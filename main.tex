@@ -106,12 +106,12 @@ showstringspaces=false
 \affiliation{KTH Royal Institute of Technology, SE-100 44 Stockholm, Sweden \\ Swedish NCSA, Swedish Armed Forces, SE-107 85 Stockholm, Sweden}
 
 \begin{abstract}
-We significantly reduce the cost of factoring integers and computing discrete logarithms over finite fields on a quantum computer by combining techniques from Griffiths-Niu 1996, Zalka 2006, Fowler 2012, Ekerå-Håstad 2017, Ekerå 2017, Ekerå 2018, Gidney-Fowler 2019, Gidney 2019.
+We significantly reduce the cost of factoring integers and computing discrete logarithms in finite fields on a quantum computer by combining techniques from Shor 1994, Griffiths-Niu 1996, Zalka 2006, Fowler 2012, Ekerå-Håstad 2017, Ekerå 2017, Ekerå 2018, Gidney-Fowler 2019, Gidney 2019.
 We estimate the approximate cost of our construction using plausible physical assumptions for large-scale superconducting qubit platforms:
  a planar grid of qubits with nearest-neighbor connectivity,
  a characteristic physical gate error rate of $10^{-3}$,
  a surface code cycle time of 1 microsecond,
- and a reaction time of 10 micro\-seconds.
+ and a reaction time of 10 microseconds.
 We account for factors that are normally ignored such as noise, the need to make repeated attempts, and the spacetime layout of the computation.
 When factoring 2048 bit RSA integers, our construction's spacetime volume is a hundredfold less than comparable estimates from earlier works (Fowler et al. 2012, Gheorghiu et al. 2019).
 In the abstract circuit model (which ignores overheads from distillation, routing, and error correction) our construction uses $3 n + 0.002 n \lg n$ logical qubits, $0.3 n^3 + 0.0005 n^3 \lg n$ Toffolis, and $500 n^2 + n^2 \lg n$ measurement depth to factor $n$-bit RSA integers.
@@ -134,6 +134,7 @@ This noise necessitates the use of error correction, which introduces overheads 
 
 Although Shor's algorithms run in polynomial time, the constant factors hidden by the asymptotic notation are substantial.
 These constant factors must be overcome, by heavy optimization at all levels, in order to make the algorithms practical.
+Current quantum computers are far from being capable of executing Shor's algorithms for cryptographically relevant problem sizes.
 
 \subsection{Our contributions and a summary of our results}
 
@@ -265,7 +266,7 @@ ECC Log Construction
             &$n=160$ &$n=224$ &$n=256$
                 \\
 \hline
-Roetteler et al 2017 \cite{roetteler2017quantum}
+Roetteler et al. 2017 \cite{roetteler2017quantum}
     &$9n + O(\lg n)$
     &$448 n^3 \lg n + 4090 n^3$
     &$448 n^3 \lg n + 4090 n^3$
@@ -387,7 +388,7 @@ Gheorghiu et al. 2019 \cite{gheorghiu2019cryptanalysis}
 }
   \caption{
     Historical estimates of the expected costs of factoring $n=2048$ bit RSA integers, and the assumptions they used.
-    Our spacetime volumes can be directly compared to the volume from Fowler et al. (we achieve a 165x improvement), because Fowler et al's estimate is dominated by distillation and changing the reaction time doesn't affect this volume.
+    Our spacetime volumes can be directly compared to the volume from Fowler et al. (we achieve a 165x improvement), because Fowler et al.'s estimate is dominated by distillation and changing the reaction time doesn't affect this volume.
     It is unclear how to compare O'Gorman et al.'s volume to ours, because of the difference in connectivity.
     Multiplying the volume from Gheorghiu et al. by 5, to account for the difference in cycle time, allows comparison to our volume (we achieve a 140x improvement).
     See \app{historical-table-details} for details on each entry in this table.
@@ -397,7 +398,7 @@ Gheorghiu et al. 2019 \cite{gheorghiu2019cryptanalysis}
 We use the standard square-and-multiply approach to reduce the exponentiations into a sequence of modular multiplications.
 We apply optimizations to reduce the number of multiplications and the cost of each multiplication.
 
-The number of multiplications is reduced by using windowed arithmetic \cite{gidney2019windowedarithmetic}, which uses small table lookups to fuse several multiplications together.
+The number of multiplications is reduced by using windowed arithmetic \cite{van2005fastexponentiation,gidney2019windowedarithmetic}, which uses small table lookups to fuse several multiplications together.
 It is also reduced by using Ekerå and Håstad's derivatives \cite{ekeraa2016modifying, ekeraa2017quantum, ekeraa2017pp, ekeraa2018general} of Shor's algorithms, that require fewer multiplications to be performed  compared to Shor's original algorithms.
 
 The cost of each multiplication is reduced by combining several optimizations.
@@ -409,8 +410,14 @@ We use a layout of the core lookup addition operation where carry propagation is
 Finally, we optimize the overall computation by trying many possible parameter sets (e.g. window sizes and code distances) for each problem size and selecting the best parameter set.
 
 We estimate the approximate cost of our construction, both in the abstract circuit model, and in terms of its runtime and physical qubit usage in an error corrected implementation under plausible physical assumptions for large-scale superconducting qubit platforms with nearest neighbor connectivity (see \fig{plot-costs}).
+Our physical estimates are based on the surface code \cite{fowler2012surfacecodereview}.
+We assume distance-$d$ logical qubits are stored using square patches of $2(d+1)^2$ physical qubits (see \fig{lattice-surgery-qubit}) and are operated on via lattice surgery \cite{horsman2012latticesurgery,fowler2018} (see \fig{lattice-surgery-board}).
 We provide concrete cost estimates for several cryptographically relevant problems, such as the RSA integer factoring problem, and various parameterizations of the DLP in finite fields.
 These cost estimates may be used to inform decisions on when to mandate migration from currently deployed vulnerable cryptosystems to post-quantum secure systems or hybrid systems.
+
+We caution the reader that, although we report two significant figures in our tables, there are large systemic uncertainties in our estimates.
+For example, doubling (or halving) the physical gate error rate would increase (or decrease) the number of qubits required by more than $10\%$.
+The estimates we present are intended to be ballpark figures that the cryptographic community can use to understand the potential impact of quantum computers; not exacting predictions of the future.
 
 Compared to previous works, we reduce the Toffoli count when factoring RSA integers by over 10x (see \tbl{comparison}).
 To only compare the Toffoli counts as in \tbl{comparison} may prove misleading, however, as it ignores the cost of routing, the benefits of parallelization, etc.
@@ -494,7 +501,7 @@ The total exponent length is hence $n_e = 3m = 1.5n + O(1)$ qubits, compared to 
 It is this reduction in the exponent length that translates into a reduction in the overall number of multiplications that need to be performed on the quantum computer.
 
 The two exponent registers are initialized to uniform superpositions of all $2^m$ and $2^{2m}$ values, respectively, and two quantum Fourier transforms are applied independently to the two registers.
-This implies that standard optimization techniques, such as the square-and-multiply technique, the semi-classical Fourier transform of Griffiths and Niu \cite{griffiths1996semiclassical}, recycling of qubits in the exponent registers \cite{mosca1999recycle}, and so forth, are directly applicable.
+This implies that standard optimization techniques, such as the square-and-multiply technique, the semi-classical Fourier transform of Griffiths and Niu \cite{griffiths1996semiclassical}, recycling of qubits in the exponent registers \cite{mosca1999recycle, parker2000recycle}, and so forth, are directly applicable.
 
 The classical post-processing algorithm used to extract the logarithm from the observed frequencies is by necessity different from Shor's.
 It uses lattice-based techniques, and critically does not require $r$ to be known.
@@ -516,7 +523,7 @@ For the full details, see section A.2.1 of \cite{ekeraa2017pp}.
 To avoid overloading the reader, we will describe our factoring construction by starting from a simple reference implementation of the quantum part of Shor's original algorithm and then apply optimizations one by one.
 
 The reference implementation works the way most implementations of Shor's algorithm do, by decomposing exponentiation into iterative controlled modular multiplication \cite{vedral1996arithmetic, zalka1998fast, zalka2006pure, beauregard2002shor, haner2016factoring, gidney2017factoring}.
-A register $\productreg$ is initialized into the $|1\rangle$ state, then a controlled modular multiplication of the classical constant $\gen^{2^j} \pmod{N}$ into $\productreg$ is performed, controlled by the qubit $e_j$ from the exponent $e$, for each integer $j$ from $0$ to $\lenexp-1$.
+A register $\productreg$ is initialized into the $|1\rangle$ state, then a controlled modular multiplication of the classical constant $\gen^{2^j} \pmod{N}$ into $\productreg$ is performed, controlled by the qubit $e_j$ from the exponent $e$, for each integer $j$ from $\lenexp-1$ down to $0$.
 After the multiplications are done, $\productreg$ is storing $\gen^e \pmod{N}$ and measuring $\productreg$ completes the hard part of Shor's algorithm.
 
 Controlled modular multiplication is still not a primitive operation, so it must also be decomposed.
@@ -528,17 +535,27 @@ Performing a controlled scaled addition with classical scale factor $k$ can be d
 For each qubit $q_j$ in the input register, you add $k \cdot 2^j \pmod{N}$ into the target, controlled by $q_j$.
 Controlled modular addition in turn is performed via a series of non-modular additions and comparisons.
 For example, \cite{vedral1996arithmetic} uses five additions for this purpose.
-Finally, using the Cuccaro adder \cite{cuccaro2004adder}, uncontrolled non-modular additions can be performed with no additional workspace using $2n$ Toffolis.
+Finally, using the Cuccaro adder \cite{cuccaro2004adder}, uncontrolled non-modular additions can be performed with $O(1)$ additional workspace using $2n$ Toffolis.
 
 Combining the numbers in the preceding two paragraphs implies a Toffoli count of $\lenexp \cdot 2n \cdot 5 \cdot 2n = 20 \lenexp n^2$ for the reference implementation.
+It constitutes the baseline for the optimizations that we apply in the following sections.
 
+\subsection{The quantum Fourier transform}
+Before proceeding, note that we focus exclusively on costing the controlled modular multiplications, both in the reference implementation and throughout the remainder of this paper.
+This is because they constitute the hard part of Shor's algorithm from an implementation perspective.
+The other part of the algorithm, the quantum Fourier transform (QFT), can be implemented semi-classically \cite{griffiths1996semiclassical} and interleaved with the controlled modular multiplications.
+
+When the QFT is implemented in this manner (see~\fig{exponent-grouping}) it suffices to have control qubits for the window of controlled modular multiplications currently being processed, as these control qubits may be recycled \cite{mosca1999recycle, parker2000recycle}. In the QFT, a sequence of classically controlled gates that shift the phase by $2\pi/2^k$ for various integers $k$ up to the QFT dimension are applied to the control qubit for each modular multiplication.
+This sequence can be combined into a single shift, and implemented using e.g. the technique in \cite{bocharov2015rus}, to a level of precision far below other sources of error in the algorithm without incurring a noticeable cost. This implies that the cost of implementing the QFT is negligible.
+
+Note furthermore that when we analyze the success probabilities of Shor's algorithms, and the various derivatives, we assume the use of an ideal QFT even though the implemented QFT is technically an approximation.
 
 \subsection{The coset representation of modular integers}
 
 Following Zalka \cite{zalka2006pure}, the first improvement we make over the reference implementation is to switch from the usual representation of integers to the coset representation of modular integers.
 The usual representation of an integer $k$ in a quantum computer is the computational basis state $|k\rangle$.
 The coset representation is different: it uses a periodic superposition with period $N$ and offset $k$.
-In ideal conditions, the integer $k \pmod{N}$ is represented by the state $\sqrt{2^{-\gpad}} \sum_{j=0}^{2^\gpad} |jN + k\rangle$ where $\gpad$ is the number of additional padding qubits placed at the end of the register.
+In ideal conditions, the integer $k \pmod{N}$ is represented by the state $\sqrt{2^{-\gpad}} \sum_{j=0}^{2^\gpad-1} |jN + k\rangle$ where $\gpad$ is the number of additional padding qubits placed at the end of the register.
 The key idea is that the periodicity of the superposition causes a non-modular adder to perform approximate modular addition on this representation, and the error of the approximation can be exponentially suppressed by adding more padding to the register.
 
 As we will discuss later, the amount of padding required is logarithmic in the number of operations.
@@ -556,6 +573,28 @@ We fuse groups of controlled additions into single lookup additions.
 A lookup addition is an addition where the value to add into a register is the result of a table lookup.
 Small windows of the qubits that would have been used as controls for the additions are instead treated as addresses into classically precomputed tables of values to unconditionally add into the target.
 
+\begin{figure}
+\resizebox{\textwidth}{!}{
+\Qcircuit @R=1em @C=0.75em {
+\\
+&&\lstick{|+\rangle} &\gate{R_z(...)} &       \multigate{3}{\text{Input }e[\lenexp-4:\lenexp]}&       \multigate{3}{\text{QFT}}&\meter&&&&\lstick{|+\rangle} &\gate{R_z(...)} &       \multigate{3}{\text{Input }e[\lenexp-8:\lenexp-4]}&       \multigate{3}{\text{QFT}}&\meter&&&\dots\\
+&&\lstick{|+\rangle} &\gate{R_z(...)} &              \ghost{\text{Input }e[\lenexp-4:\lenexp]}&              \ghost{\text{QFT}}&\meter&&&&\lstick{|+\rangle} &\gate{R_z(...)} &              \ghost{\text{Input }e[\lenexp-8:\lenexp-4]}&              \ghost{\text{QFT}}&\meter&&&\dots\\
+&&\lstick{|+\rangle} &\gate{R_z(...)} &              \ghost{\text{Input }e[\lenexp-4:\lenexp]}&              \ghost{\text{QFT}}&\meter&&&&\lstick{|+\rangle} &\gate{R_z(...)} &              \ghost{\text{Input }e[\lenexp-8:\lenexp-4]}&              \ghost{\text{QFT}}&\meter&&&\dots\\
+&&\lstick{|+\rangle} &\gate{R_z(...)} &              \ghost{\text{Input }e[\lenexp-4:\lenexp]}&              \ghost{\text{QFT}}&\meter&&&&\lstick{|+\rangle} &\gate{R_z(...)} &              \ghost{\text{Input }e[\lenexp-8:\lenexp-4]}&              \ghost{\text{QFT}}&\meter&&&\dots\\
+&{/}\qw&\ustick{n}\qw&\qw             &\gate{\times \gen^{2^{n_e-4} \cdot e[\lenexp-4:\lenexp]} \pmod{N}}\qwx&                      \qw&   \qw&\qw&\qw&\qw&\qw       &\qw             &\gate{\times \gen^{2^{n_e-8} \cdot e[\lenexp-8:\lenexp-4]} \pmod{N}}\qwx&                      \qw&\qw&\qw&\qw&\dots\\
+\\
+}
+}
+    \caption{
+    \label{fig:exponent-grouping}
+    Working through the qubits representing an exponent in Shor's algorithm with a window size $\gexp$ of four, while using a semi-classical Fourier transform \cite{griffiths1996semiclassical} with recycling \cite{mosca1999recycle, parker2000recycle}.
+    The notation $e[a:b] = \lfloor e / 2^a \rfloor \bmod 2^{b-a}$ refers to a slice of (qu)bits in $e$ from (qu)bit index $a$ (inclusive) to (qu)bit index $b$ (exclusive).
+    Each $R_z(\dots)$ gate rotates by an amount determined by previous measurements, e.g. using the technique in \cite{bocharov2015rus}.
+    All 16 possible values of the expression $\gen^{e[4:8] 2^4} \pmod{N}$ (and similar expressions) can be precomputed classically, and looked up on demand within the multiplication circuit.
+    This reduces the number of multiplications by a factor of the window size, at the cost of some additional lookup work within the multiplication.
+    }
+\end{figure}
+
 Second, at the level of the exponentiation, we window over the controlled multiplications.
 This is done by including exponent qubits in the addresses of all lookups being performed within the multiplications.
 We refer the reader to \cite{gidney2019windowedarithmetic} for the exact details of this nested windowed arithmetic construction.
@@ -566,10 +605,12 @@ Let $\gmul$ be the size of the window over factor qubits being used to control a
 Using these parameters, the $\lenexp$ controlled multiplications we needed to perform become $\lenexp / \gexp$ uncontrolled multiplications while the $2 n$ controlled additions we needed to perform within each multiplication become $2 n / \gmul$ uncontrolled additions.
 The tradeoff is that each addition is now accompanied by a lookup with an address of size $\gexp + \gmul$.
 
-Using Cuccaro et al's adder \cite{cuccaro2004adder}, each $n$-bit addition has a Toffoli count and measurement depth of $2n$.
-Using Babbush et al's QROM read \cite{babbush2018}, each table lookup has a Toffoli count and measurement depth of $2^{\gmul+\gexp}$.
-The cost of uncomputing the lookup is negligible due to using measurement based uncomputation \cite{berry2019qubitization}.
-The overhead due to the logarithmic padding introduced by the coset representation of modular integers is also negligible (for now).
+Using Cuccaro et al.'s adder \cite{cuccaro2004adder}, each $n$-bit addition has a Toffoli count and measurement depth of $2n$.
+Using Babbush et al.'s QROM read (section 3A of \cite{babbush2018}), each table lookup has a Toffoli count and measurement depth of $2^{\gmul+\gexp}$ and uses a negligible $O(\gmul + \gexp)$ ancillae.
+Using measurement based uncomputation (appendix C of \cite{berry2019qubitization}), uncomputing each table lookup has a Toffoli count and measurement depth of $2 \sqrt{2^{\gmul + \gexp}}$ which is negligible compared to the lookup for the parameters we will be using.
+The measurement based uncomputation uses $\text{max}(0, \sqrt{2^{\gmul + \gexp}} - n)$ ancillae (it starts by measuring away $n$ logical qubits of the lookup output register).
+This ancillae count is always zero for the reasonable values of $\gmul, \gexp$, and classically intractable values of $n$, that we consider in this paper.
+The overhead due to the logarithmic padding introduced by the coset representation of modular integers is logarithmic in $n$.
 
 Thus, by using windowed arithmetic, the leading term of the Toffoli count of the reference implementation has been reduced to $\frac{2 \lenexp n}{\gmul \gexp} (2n + 2^{\gmul + \gexp})$.
 If we set $\gmul = \gexp = \frac{1}{2} \lg n$ then we achieve a Toffoli count with leading term $\frac{24 \lenexp n^2}{\lg^2 n}$.
@@ -580,40 +621,6 @@ The qubits are distributed as follows:
   $n + O(\lg n)$ for the lookup output register,
   and $O(\lg n)$ qubits to hold the part of the exponent needed for the current stage of the semi-classical Fourier transform \cite{griffiths1996semiclassical}.
 
-\subsection{Oblivious carry runways}
-
-The last major algorithmic optimization we apply is the use of oblivious carry runways \cite{gidney2019approximatepermutation}.
-The basic problem addressed by runways is that, normally, a carry signal generated at the bottom of a register must propagate all the way to the top of the register.
-This process can be short-circuited by instead terminating the carry propagation into an appropriately constructed runway.
-Runways allow large additions to be performed piecewise, with each piece being worked on in parallel, by terminating carries into appropriately placed runways at the end of each piece.
-
-As with the coset representation of modular integers, circuits using oblivious carry runways approximate the original circuit instead of perfectly reproducing it.
-But, as we will discuss later, increasing the runway length $\gpad$ exponentially suppresses the approximation error.
-
-The major benefit of oblivious carry runways, compared to previous techniques for reducing the depth of addition such as Draper et al's logarithmic depth carry-lookahead adder \cite{draper2004logarithmic}, is that oblivious carry runways can be introduced gradually without incurring large overheads.
-The Toffoli count and workspace overheads are linear in the number of pieces $\lceil n/\gsep\rceil$ (where $\gsep$ is the runway spacing) but only logarithmic in $n$.
-For example, if you place a single runway at the midpoint of a 2048-qubit register, then the number of qubits and the number of Toffolis needed to perform an addition will increase by a couple percent but the depth of the additions is nearly halved.
-
-\begin{figure}
-\resizebox{\textwidth}{!}{
-\Qcircuit @R=1em @C=0.75em {
-\\
-&&\lstick{|+\rangle} &\gate{R_z(...)} &       \multigate{3}{\text{Input }e_{0:4}}&       \multigate{3}{\text{QFT}}&\meter&&&&\lstick{|+\rangle} &\gate{R_z(...)} &       \multigate{3}{\text{Input }e_{4:8}}&       \multigate{3}{\text{QFT}}&\meter&&&\dots\\
-&&\lstick{|+\rangle} &\gate{R_z(...)} &              \ghost{\text{Input }e_{0:4}}&              \ghost{\text{QFT}}&\meter&&&&\lstick{|+\rangle} &\gate{R_z(...)} &              \ghost{\text{Input }e_{4:8}}&              \ghost{\text{QFT}}&\meter&&&\dots\\
-&&\lstick{|+\rangle} &\gate{R_z(...)} &              \ghost{\text{Input }e_{0:4}}&              \ghost{\text{QFT}}&\meter&&&&\lstick{|+\rangle} &\gate{R_z(...)} &              \ghost{\text{Input }e_{4:8}}&              \ghost{\text{QFT}}&\meter&&&\dots\\
-&&\lstick{|+\rangle} &\gate{R_z(...)} &              \ghost{\text{Input }e_{0:4}}&              \ghost{\text{QFT}}&\meter&&&&\lstick{|+\rangle} &\gate{R_z(...)} &              \ghost{\text{Input }e_{4:8}}&              \ghost{\text{QFT}}&\meter&&&\dots\\
-&{/}\qw&\ustick{n}\qw&\qw             &\gate{\times \gen^{2^0 e_{0:4}} \pmod{N}}\qwx&                      \qw&   \qw&\qw&\qw&\qw&\qw       &\qw             &\gate{\times \gen^{2^4 e_{4:8}} \pmod{N}}\qwx&                      \qw&\qw&\qw&\qw&\dots\\
-\\
-}
-}
-    \caption{
-    \label{fig:exponent-grouping}
-    Working through the qubits representing an exponent in Shor's algorithm with a window size $\gexp$ of four, while using a semi-classical Fourier transform \cite{griffiths1996semiclassical}.
-    Each $R_z(\dots)$ gate rotates by an amount determined by previous measurements.
-    All 16 possible values of the expression $\gen^{e_{4:8} 2^4} \pmod{N}$ (and similar expressions) can be precomputed classically, and looked up on demand within the multiplication circuit.
-    This reduces the number of multiplications by a factor of the window size, at the cost of some additional lookup work within the multiplication.
-    }
-\end{figure}
 
 \begin{figure}
     \label{fig:temp-register-fold}
@@ -638,6 +645,24 @@ For example, if you place a single runway at the midpoint of a 2048-qubit regist
         The multiply-add should occur during the ``$\dots$" section in the middle.
     }
 \end{figure}
+
+\subsection{Oblivious carry runways}
+
+The last major algorithmic optimization we apply is the use of oblivious carry runways \cite{gidney2019approximatepermutation}.
+The basic problem addressed by runways is that, normally, a carry signal generated at the bottom of a register must propagate all the way to the top of the register.
+This process can be short-circuited by instead terminating the carry propagation into an appropriately constructed runway.
+Runways allow large additions to be performed piecewise, with each piece being worked on in parallel, by terminating carries into appropriately placed runways at the end of each piece.
+
+As with the coset representation of modular integers, circuits using oblivious carry runways approximate the original circuit instead of perfectly reproducing it.
+But, as we will discuss later, increasing the runway length $\gpad$ exponentially suppresses the approximation error.
+
+Note that we use $\gpad$ for both the runway length of oblivious carry runways and the padding length of the coset representation.
+We do this because they have identical error mechanisms, namely unwanted carries into the extra qubits.
+There is negligible benefit in suppressing one more than the other.
+
+The major benefit of oblivious carry runways, compared to previous techniques for reducing the depth of addition such as Draper et al.'s logarithmic depth carry-lookahead adder \cite{draper2004logarithmic}, is that oblivious carry runways can be introduced gradually without incurring large overheads.
+The Toffoli count and workspace overheads are linear in the number of pieces $\lceil n/\gsep\rceil$ (where $\gsep$ is the runway spacing) but only logarithmic in $n$.
+For example, if you place a single runway at the midpoint of a 2048-qubit register, then the number of qubits and the number of Toffolis needed to perform an addition will increase by a couple percent but the depth of the additions is nearly halved.
 
 \subsection{Interactions between optimizations}
 
@@ -689,7 +714,7 @@ Therefore the total number of lookup additions we need to perform is
 The lookup additions make up essentially the entire cost of the algorithm, i.e.
 the total Toffoli count is approximately equal to the Toffoli count of a lookup addition times the lookup addition count.
 This works similarly for the measurement depth.
-Ignoring the negligible cost of uncomputing the lookup, the Toffoli count of a lookup addition is $2n + n \gpad / \gsep + 2^{\gexp + \gpad}$ and the measurement depth is $2n + 2 \gpad + 2^{\gexp + \gmul}$.
+Ignoring the negligible cost of uncomputing the lookup, the Toffoli count of a lookup addition is $2n + n \gpad / \gsep + 2^{\gexp + \gpad}$ and the measurement depth is $2 \gsep + 2 \gpad + 2^{\gexp + \gmul}$.
 Therefore
 
 \begin{equation}
@@ -738,6 +763,19 @@ Therefore the approximation error (i.e. the trace distance due to approximations
 This is significantly lower than other error rates we will calculate.
 
 
+\begin{figure}
+    \label{fig:time-bars}
+    \resizebox{\linewidth}{!}{
+        \includegraphics{assets/data-over-time-plot.png}
+    }
+    \caption{
+        How the computation is roughly laid out over time during the lookup-add-unlookup inner loop of our construction, as generalized from \cite{gidney2019autoccz}.
+        During lookup, the target register is spread out to make room for the temporary register that will hold the lookup's output.
+        During addition the target register and lookup output register are squeezed through a moving operating area that sweeps up then down, applying the MAJ and UMA sweeps of Cuccaro's adder.
+        Uncomputing the lookup is done with measurement based uncomputation \cite{berry2019qubitization}, which is overlapped slightly with the UMA sweep (this is why the yellow rows disappear early).
+    }
+\end{figure}
+
 \subsection{Spacetime layout}
 
 Our implementation of Shor's algorithm uses a layout that is derived from the (nearly) reaction limited layouts presented in \cite{gidney2019autoccz}.
@@ -769,20 +807,8 @@ The $\gpad + \gsep$ qubits from each register add another 30 rows (approximately
 So, overall, when working on a problem of size $n$, the computation covers a $113w \times 63$ grid of logical qubits where $w=n/\gsep=n/1024$.
 
 
-\begin{figure}
-    \label{fig:time-bars}
-    \resizebox{\linewidth}{!}{
-        \includegraphics{assets/data-over-time-plot.png}
-    }
-    \caption{
-        How the computation is roughly laid out over time during the lookup-add-unlookup inner loop of our construction, as generalized from \cite{gidney2019autoccz}.
-        During lookup, the target register is spread out to make room for the temporary register that will hold the lookup's output.
-        During addition the target register and lookup output register are squeezed through a moving operating area that sweeps up then down, applying the MAJ and UMA sweeps of Cuccaro's adder.
-        Uncomputing the lookup is done with measurement based uncomputation \cite{berry2019qubitization}, which is overlapped slightly with the UMA sweep (this is why the yellow rows disappear early).
-    }
-\end{figure}
 
-\begin{figure}
+\begin{figure}[p]
     \label{fig:addition-layout-2d}
     \resizebox{\linewidth}{!}{
         \includegraphics{assets/adder-layout-2d.png}
@@ -795,7 +821,7 @@ So, overall, when working on a problem of size $n$, the computation covers a $11
     }
 \end{figure}
 
-\begin{figure}
+\begin{figure}[p]
     \label{fig:lookup-layout}
     \resizebox{\linewidth}{!}{
         \includegraphics{assets/lookup-layout-2d.png}
@@ -809,7 +835,7 @@ So, overall, when working on a problem of size $n$, the computation covers a $11
     }
 \end{figure}
 
-\begin{figure}
+\begin{figure}[p]
     \label{fig:addition-layout-3d}
     \resizebox{\linewidth}{!}{
         \includegraphics{assets/adder-layout-3d.png}
@@ -828,7 +854,7 @@ So, overall, when working on a problem of size $n$, the computation covers a $11
 
 \subsection{Runtime}
 
-Because our implementation is dominated almost entirely by the cost of performing lookup additions, its duration is approximately equal to the number of lookup additions times the duration of a single lookup addition.
+Because our implementation is dominated almost entirely by the cost of performing lookup additions, its runtime is approximately equal to the number of lookup additions times the runtime of a single lookup addition.
 
 During the lookup phase of a lookup addition, the computation is code depth limited.
 Assuming a code depth of $d=27$ and a surface code cycle time of 1 microsecond, it takes $1 \mu s \cdot d/2 \cdot 2^{\gexp + \gmul} \approx 14$ milliseconds to perform the lookup using double-access hallways.
@@ -837,13 +863,13 @@ Given a reaction time of 10 microseconds, it takes $2(\gsep + \gpad) \cdot 10 \m
 The remaining bits of a lookup addition, such as uncomputing the lookup and rearranging the rows, take approximately 1 millisecond.
 
 Thus one lookup addition takes approximately 37 milliseconds.
-Given this fact, i.e. that we perform quantum lookup additions slower than most video games render entire frames, we can approximate the total duration:
+Given this fact, i.e. that we perform quantum lookup additions slower than most video games render entire frames, we can approximate the total runtime:
 
 \begin{equation}
 \begin{aligned}
     \text{TotalRuntime}(n, \lenexp)
-    &\approx \text{LookupAdditionCount}(n, \lenexp) \cdot 37 \mu s
-    \\&\approx 4 \lenexp n \mu s
+    &\approx \text{LookupAdditionCount}(n, \lenexp) \cdot 37 \;\text{milliseconds}
+    \\&\approx 4 \lenexp n \;\text{milliseconds}
 \end{aligned}
 \end{equation}
 
@@ -862,24 +888,27 @@ This quantity is computed by considering the initial error rate of injecting phy
 
 \subsection{Topological error}
 
-Now that we know the number of logical qubits, and the duration of the algorithm, we can approximate the probability of a topological error occurring within the surface code during the algorithm.
+Elsewhere in this paper we frame our hardware assumptions in terms of a physical gate error rate.
+In \cite{fowler2013surfaceblock} it is stated that, for a physical gate error rate of $10^{-3}$, the probability of error in a logical qubit of distance $d$, per surface code cycle, is approximately $10^{-\lceil d/2+1 \rceil}$.
+We base our cost estimates on the assumption that this scaling relationship holds.
+Each time the code distance is increased by 2, the logical error suppression must jump by at least a factor of 10.
+We believe a physical error rate of $10^{-3}$ is sufficient to achieve this scaling relationship.
+
+Now that we know the number of logical qubits, the runtime of the algorithm, and the relationship between code distance and logical error rates, we can approximate the probability of a topological error occurring within the surface code during the execution of the algorithm.
 This will allow us to verify our initial assumption that a code distance of 27 is sufficient in the case where $n=2048$.
 Larger computations will require larger code distances.
 
-Assuming a physical gate error rate of $10^{-3}$, the probability of error in a logical qubit of distance $d$, per surface code cycle time, is approximately $10^{-\lceil d/2+1 \rceil}$ (see equation 11 from \cite{fowler2012bridge}).
 When factoring an $n=2048$ bit RSA integer we are using a board of $226 \cdot 63$ logical qubits.
 Approximately 25\% of these qubits are being used for distillation, which we already accounted for, and so we do not count them in this calculation.
-The remaining qubits are kept through $4 \lenexp n \approx 50$ billion surface code cycles, implying the chance of topological error is approximately $10^{-\lceil 27/2+1 \rceil} \cdot 226 \cdot 63 \cdot 0.75 \cdot 50 \cdot 10^9 \approx 50\%$.
+The remaining qubits are kept through $4 \lenexp n \cdot 1000 \approx 25$ billion surface code cycles, implying the chance of topological error is approximately $10^{-\lceil 27/2+1 \rceil} \cdot 226 \cdot 63 \cdot 0.75 \cdot 25 \cdot 10^9 \approx 27\%$.
 
 This is a large error rate.
 Using a code distance of 27 is pushing the limits of feasibility.
-We would need to repeat the computation twice, on average, doubling the expected runtime.
+We would need to repeat the computation roughly 1.4 times, on average, to factor a number.
 If our goal is to minimize the expected spacetime volume of the computation, perhaps we should increase the code distance to 29.
-Doing so would increase the physical qubit count by 15\%, but the error rate would drop by approximately a factor of 10 and so the expected number of retries would be much closer to 1.
+Doing so would increase the physical qubit count by 15\%, but the error rate would drop by approximately a factor of 10 and so the expected number of runs would be much closer to 1.
 Ultimately the choice comes down to one's preferences for using more space versus taking more time.
 
-Note that, in the more precise estimates computed by ancillary file ``estimate\_costs.py", the total error rate at distance 27 is estimated to be closer to 30\%.
-This lowers the gains from increasing the code distance.
 
 \subsection{Physical qubit count}
 
@@ -998,7 +1027,12 @@ We skew the space usage when optimizing because we have a slight preference for 
 We consider all combination of parameters $(\distone, \, \disttwo, \, \devoff, \, \gmul, \, \gexp, \, \gsep)$, choose the set that minimizes the skewed expected spacetime volume, and report the corresponding estimated costs.
 
 \subsection{Implications for RSA}
-Today, the arguably most commonly used modulus size for RSA is $n=2048$ bits. Larger moduli are however in widespread use and smaller moduli have been used historically. The best current academic record is the factorization of a $768$ bit RSA modulus in 2009, see~\cite{kleinjung-rsa768} for details. In~\tbl{impact-ifp-rsa} and \fig{plot-costs}, we provide estimates for the resource and time requirements for attacking RSA for various cryptographically relevant modulus lengths $n$. The estimates are for factoring RSA integers with Ekerå-Håstads's algorithm \cite{ekeraa2017quantum,  ekeraa2017pp} that computes a short discrete logarithm, see the appendix to \cite{ekeraa2017pp} for full technical details. As is explained in \cite{ekeraa2017pp}, a single correct run of this quantum algorithm suffices for the RSA integer to be factored with at least $99\%$ success probability in the classical post-processing.
+Today, the arguably most commonly used modulus size for RSA is $n=2048$ bits.
+Larger moduli are however in widespread use and smaller moduli have been used historically.
+The best published academic record is the factorization of a $768$ bit RSA modulus in 2009, see~\cite{kleinjung-rsa768} for details.
+The factorization of a $795$ bit RSA modulus was announced in December 2019 on a number theory mailing list, see~\cite{thome-rsa795}, but no further details have as of yet been published.
+
+In~\tbl{impact-ifp-rsa} and \fig{plot-costs}, we provide etimates for the resource and time requirements for attacking RSA for various cryptographically relevant modulus lengths $n$. The estimates are for factoring RSA integers with Ekerå-Håstads's algorithm \cite{ekeraa2017quantum,  ekeraa2017pp} that computes a short discrete logarithm, see the appendix to \cite{ekeraa2017pp} for full technical details. As is explained in \cite{ekeraa2017pp}, a single correct run of this quantum algorithm suffices for the RSA integer to be factored with at least $99\%$ success probability in the classical post-processing.
 
 \begin{table}[h!]
 \begin{center}
@@ -1184,9 +1218,6 @@ If the group order is known, a better option for computing general discrete loga
 Note that the latter modification is necessary to enable the use of the semi-classical Fourier transform, qubit recycling and the windowing technique.
 The modified algorithm is described by Ekerå in \cite{ekeraa2016modifying} in the section on general logarithms, and in \cite{ekeraa2019revisiting} where a heuristic analysis is also provided.
 
-When using this modified version of Shor's algorithm to compute discrete logarithms, the heuristic analysis \cite{ekeraa2019revisiting} shows that a single correct run suffices to compute the logarithm with $\ge 99\%$ success probability, assuming each of the two exponent registers is padded with $5$ bits, and assuming a small search is performed in the classical post-processing.
-This implies that Shor's algorithm outperforms Ekerå's algorithm, as Shor's algorithm performs only approximately $2n_r$ group operations per run, compared to $3n_r$ operations in Ekerå's algorithm, see \tbl{impact-dlp-ff-shor} for complexity estimates. This is because Ekerå's algorithm does not require $r$ to be known. In fact, it computes both $d$ and $r$.
-
 \begin{table}[h!]
 \begin{center}
 \begin{tabularx}{0.89\textwidth}{
@@ -1278,6 +1309,9 @@ This table was produced by the script in the ancillary file ``estimate\_costs.py
 \label{tbl:impact-dlp-ff-shor}
 \end{center}
 \end{table}
+
+When using this modified version of Shor's algorithm to compute discrete logarithms, the heuristic analysis \cite{ekeraa2019revisiting} shows that a single correct run suffices to compute the logarithm with $\ge 99\%$ success probability, assuming each of the two exponent registers is padded with $5$ bits, and assuming a small search is performed in the classical post-processing.
+This implies that Shor's algorithm outperforms Ekerå's algorithm, as Shor's algorithm performs only approximately $2n_r$ group operations per run, compared to $3n_r$ operations in Ekerå's algorithm, see \tbl{impact-dlp-ff-shor} for complexity estimates. This is because Ekerå's algorithm does not require $r$ to be known. In fact, it computes both $d$ and $r$.
 
 Note that for safe-prime groups, $r = (N-1)/2$, so when $N$ is known to the adversary then so is $r$. For Schnorr groups, it may be that $r$ is unknown to the adversary, especially if the group is randomly selected. It may be hard to compute $r$ classically, as it amounts to finding a $n_r = 2z$ bit prime factor of $(N-1)/2$.
 
@@ -1462,13 +1496,13 @@ We presented concrete cost estimates for several cryptographically relevant prob
 Our estimated costs are orders of magnitude lower than in previous works with comparable physical assumptions.
 
 In \cite{mosca2018cybersecurity}, Mosca poses the hypophoric question: ``How many physical qubits will we need to break RSA-2048? [...] Current estimates range from tens of millions to a billion physical qubits".
-The upper bound of ``a billion physical qubits" is likely from \cite{fowler2012surfacecodereview}.
+The estimate of ``a billion physical qubits" is likely from \cite{fowler2012surfacecodereview}.
 Our physical assumptions are more pessimistic than the physical assumptions used in that paper (see \tbl{historical-comparison}), so our results can be directly compared.
-Doing so shows that, in the four years since 2015, the worst case estimate of how many qubits will be needed to factor 2048 bit RSA integers has dropped nearly two orders of magnitude; from a billion to twenty million.
+Doing so shows that, in the four years since 2015, the upper end of the estimate of how many qubits will be needed to factor 2048 bit RSA integers has dropped nearly two orders of magnitude; from a billion to twenty million.
 
 Clearly the low end of Mosca's estimate should also drop.
 However, the low end of the estimate is highly sensitive to advances in the design of quantum error correcting codes, the engineering of physical qubits, and the construction of quantum circuits.
-As predicting these advances is out of the scope of this paper, we leave the task of estimating new lower bounds to others.
+Predicting such advances is beyond the scope of this paper.
 
 Post-quantum cryptosystems are in the process of being standardized \cite{alagic2019status}, and small-scale experiments with deploying such systems on the internet have been performed \cite{google2016postquantum}.
 However, a considerable amount of work remains to be done to enable large-scale deployment of post-quantum cryptosystems.
@@ -1606,7 +1640,7 @@ Here is where each entry in the table came from:
         Asymptotic bounds explained in \sec{construction}.
         Concrete numbers at specific sizes come from ancillary file ``estimate\_costs.py".
         The Toffoli count does not account for the chance of retrying (because it is mostly insensitive to changes that lower this chance), but the volume does account for it (i.e. it is the expected total volume to factor, not the per-run volume).
-    \item Roetteler et al 2017 \cite{roetteler2017quantum}:
+    \item Roetteler et al. 2017 \cite{roetteler2017quantum}:
         Note that we used different values of $n$ in order to compare against ECC keys with comparable security.
         We used the same size pairs as in \cite{roetteler2017quantum} after double-checking them using \href{https://www.keylength.com/}{keylength.com} \cite{keylength2019}.
         \begin{itemize}
@@ -1662,7 +1696,7 @@ Here is where each entry in the table came from:
     \item O'Gorman et al. (2017) \cite{ogorman2017factories}:
         Numbers are derived from table I of \cite{ogorman2017factories}.
         The physical qubit count of $2.18 \cdot 10^8$ from their table only includes distillation; we increased it by $3 \cdot 2048 \cdot (2 \cdot 32^2) \approx 0.13 \cdot 10^8$ to account for three $n$-logical-qubit data registers.
-        It is difficult to directly compare O'Gorman et al's numbers to ours, because their estimates were made with ion traps in mind.
+        It is difficult to directly compare O'Gorman et al.'s numbers to ours, because their estimates were made with ion traps in mind.
         Their underlying physical assumptions differ in ways that have non-trivial effects on the physical layout.
         In particular, their factories interact remote logical qubits without routing them towards each other.
     \item Gheorghiu et al. (2019) \cite{gheorghiu2019cryptanalysis}
