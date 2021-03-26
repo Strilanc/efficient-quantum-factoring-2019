@@ -43,10 +43,11 @@ Parameters = NamedTuple(
 
 
 def parameters_to_attempt(n: int,
-                          n_e: int
+                          n_e: int,
+                          gate_error_rate: float,
                           ) -> Iterator[Parameters]:
-    l1_distances = [15, 17, 19, 21, 23]
-    l2_distances = range(25, 51, 2)
+    l1_distances = [5, 7, 9, 11, 13, 15, 17, 19, 21, 23]
+    l2_distances = range(9, 51, 2)
     exp_windows = [4, 5, 6]
     mul_windows = [4, 5, 6]
     runway_seps = [512, 768, 1024, 1536, 2048]
@@ -66,7 +67,7 @@ def parameters_to_attempt(n: int,
             distill_types.append(True)
         for b in distill_types:
             yield Parameters(
-                gate_err=1e-3,
+                gate_err=gate_error_rate,
                 reaction_time=datetime.timedelta(microseconds=10),
                 cycle_time=datetime.timedelta(microseconds=1),
                 exp_window=exp_window,
@@ -359,16 +360,16 @@ def rank_estimate(costs: CostEstimate) -> float:
     return skewed_volume / (1 - costs.total_error)
 
 
-def estimate_best_problem_cost(n: int, n_e: int) -> Optional[CostEstimate]:
+def estimate_best_problem_cost(n: int, n_e: int, gate_error_rate: float) -> Optional[CostEstimate]:
     estimates = [estimate_algorithm_cost(params)
-                 for params in parameters_to_attempt(n, n_e)]
+                 for params in parameters_to_attempt(n, n_e, gate_error_rate)]
     surviving_estimates = [e for e in estimates if e is not None]
     return min(surviving_estimates, key=rank_estimate, default=None)
 
 
 # ------------------------------------------------------------------------------
 
-def reduce_significant(q: float, n: int = 2) -> float:
+def reduce_significant(q: float) -> float:
     """Return only the n most significant digits."""
     if q == 0:
         return 0
@@ -376,7 +377,9 @@ def reduce_significant(q: float, n: int = 2) -> float:
     result = math.ceil(q / 10**(n-1)) * 10**(n-1)
 
     # Handle poor precision in float type.
-    if result < 10:
+    if result < 0.1:
+        return round(result * 100) / 100
+    elif result < 10:
         return round(result * 10) / 10
     else:
         return round(result)
@@ -398,6 +401,7 @@ def fips_strength_level_rounded(n): # NIST-style rounding
 TABLE_HEADER = [
     'n',
     'n_e',
+    'phys_err',
     'd1',
     'd2',
     'dev_off',
@@ -416,9 +420,12 @@ TABLE_HEADER = [
 
 
 def tabulate_cost_estimate(costs: CostEstimate):
+    assert costs.params.gate_err in [1e-3, 1e-4]
+    gate_error_desc = r"0.1\%" if costs.params.gate_err == 1e-3 else r"0.01\%"
     row = [
         costs.params.n,
         costs.params.n_e,
+        gate_error_desc,
         costs.params.l1_distance,
         costs.params.code_distance,
         costs.params.deviation_padding - int(math.ceil(math.log2(costs.params.n**2*costs.params.n_e))),
@@ -440,79 +447,80 @@ def tabulate_cost_estimate(costs: CostEstimate):
 
 
 # RSA
-def eh_rsa(n) -> Optional[CostEstimate]: # Single run.
+def eh_rsa(n, gate_error_rate) -> Optional[CostEstimate]: # Single run.
     delta = 20 # Required to respect assumptions in the analysis.
     m = math.ceil(n / 2) - 1
     l = m - delta
     n_e = m + 2 * l
-    return estimate_best_problem_cost(n, n_e)
+    return estimate_best_problem_cost(n, n_e, gate_error_rate)
 
 
-def eh_rsa_max_tradeoffs(n) -> Optional[CostEstimate]: # With maximum tradeoffs.
-    return estimate_best_problem_cost(n, math.ceil(n / 2))
+def eh_rsa_max_tradeoffs(n, gate_error_rate) -> Optional[CostEstimate]: # With maximum tradeoffs.
+    return estimate_best_problem_cost(n, math.ceil(n / 2), gate_error_rate)
 
 
 # General DLP
-def shor_dlp_general(n) -> Optional[CostEstimate]:
+def shor_dlp_general(n, gate_error_rate) -> Optional[CostEstimate]:
     delta = 5 # Required to reach 99% success probability.
     m = n - 1 + delta
     n_e = 2 * m
-    return estimate_best_problem_cost(n, n_e)
+    return estimate_best_problem_cost(n, n_e, gate_error_rate)
 
 
-def eh_dlp_general(n) -> Optional[CostEstimate]: # Single run.
+def eh_dlp_general(n, gate_error_rate) -> Optional[CostEstimate]: # Single run.
     m = n - 1
     n_e = 3 * m
-    return estimate_best_problem_cost(n, n_e)
+    return estimate_best_problem_cost(n, n_e, gate_error_rate)
 
 
-def eh_dlp_general_max_tradeoffs(n) -> Optional[CostEstimate]: # Multiple runs with maximal tradeoff.
+def eh_dlp_general_max_tradeoffs(n, gate_error_rate) -> Optional[CostEstimate]: # Multiple runs with maximal tradeoff.
     m = n - 1
     n_e = m
-    return estimate_best_problem_cost(n, n_e)
+    return estimate_best_problem_cost(n, n_e, gate_error_rate)
 
 
 # Schnorr DLP
-def shor_dlp_schnorr(n) -> Optional[CostEstimate]:
+def shor_dlp_schnorr(n, gate_error_rate) -> Optional[CostEstimate]:
     delta = 5 # Required to reach 99% success probability.
     z = fips_strength_level_rounded(n)
     m = 2 * z + delta
     n_e = 2 * m
-    return estimate_best_problem_cost(n, n_e)
+    return estimate_best_problem_cost(n, n_e, gate_error_rate)
 
 
-def eh_dlp_schnorr(n) -> Optional[CostEstimate]: # Single run.
+def eh_dlp_schnorr(n, gate_error_rate) -> Optional[CostEstimate]: # Single run.
     z = fips_strength_level_rounded(n)
     m = 2 * z
     n_e = 3 * m
-    return estimate_best_problem_cost(n, n_e)
+    return estimate_best_problem_cost(n, n_e, gate_error_rate)
 
 
-def eh_dlp_schnorr_max_tradeoffs(n) -> Optional[CostEstimate]: # Multiple runs with maximal tradeoff.
+def eh_dlp_schnorr_max_tradeoffs(n, gate_error_rate) -> Optional[CostEstimate]: # Multiple runs with maximal tradeoff.
     z = fips_strength_level_rounded(n)
     m = 2 * z
     n_e = m
-    return estimate_best_problem_cost(n, n_e)
+    return estimate_best_problem_cost(n, n_e, gate_error_rate)
 
 
 # Short DLP
-def eh_dlp_short(n) -> Optional[CostEstimate]:
+def eh_dlp_short(n, gate_error_rate) -> Optional[CostEstimate]:
     z = fips_strength_level_rounded(n)
     m = 2 * z
     n_e = 3 * m
-    return estimate_best_problem_cost(n, n_e)
+    return estimate_best_problem_cost(n, n_e, gate_error_rate)
 
 
-def eh_dlp_short_max_tradeoffs(n) -> Optional[CostEstimate]: # Multiple runs with maximal tradeoff.
+def eh_dlp_short_max_tradeoffs(n, gate_error_rate) -> Optional[CostEstimate]: # Multiple runs with maximal tradeoff.
     z = fips_strength_level_rounded(n)
     m = 2 * z
     n_e = m
-    return estimate_best_problem_cost(n, n_e)
+    return estimate_best_problem_cost(n, n_e, gate_error_rate)
 
 # ------------------------------------------------------------------------------
 
 
 def tabulate():
+    gate_error_rates = [1e-3, 1e-4]
     moduli = [1024, 2048, 3072, 4096, 8192, 12288, 16384]
 
     datasets = [
@@ -529,8 +537,9 @@ def tabulate():
         print(name)
         print('&'.join(str(e).ljust(10) for e in TABLE_HEADER) + '\\\\')
         print('\hline')
-        for n in moduli:
-            tabulate_cost_estimate(func(n))
+        for e in gate_error_rates:
+            for n in moduli:
+                tabulate_cost_estimate(func(n, e))
 
 
 def significant_bits(n: int) -> int:
@@ -548,32 +557,31 @@ def plot():
     max_y = 1024 * max_steps
 
     datasets = [
-        ('C0', 'RSA via Ekerå-Håstad', eh_rsa),
-        ('C1', 'Short DLP or Schnorr DLP via Ekerå-Håstad', eh_dlp_short),
-        ('C3', 'Schnorr DLP via Shor', shor_dlp_schnorr),
-        ('C2', 'General DLP via Ekerå', eh_dlp_general),
-        ('C4', 'General DLP via Shor', shor_dlp_general),
+        ('C0', 'RSA via Ekerå-Håstad', eh_rsa, 1e-3, 'o'),
+        ('C5', 'RSA via Ekerå-Håstad - 0.01% gate error instead of 0.1%', eh_rsa, 1e-4, '*'),
+        ('C1', 'Short DLP or Schnorr DLP via EH', eh_dlp_short, 1e-3, 's'),
+        ('C3', 'Schnorr DLP via Shor', shor_dlp_schnorr, 1e-3, 'd'),
+        ('C2', 'General DLP via EH', eh_dlp_general, 1e-3, 'P'),
+        ('C4', 'General DLP via Shor', shor_dlp_general, 1e-3, 'X'),
     ]
 
     plt.subplots(figsize=(16, 9)) # force 16 x 9 inches layout for the PDF
 
-    for color, name, func in datasets:
+    for color, name, func, gate_error_rate, marker in datasets:
         valid_ns = []
         hours = []
         megaqubits = []
 
         for n in bits:
-            cost = func(n)
+            cost = func(n, gate_error_rate)
             if cost is not None:
                 expected_hours = cost.total_hours / (1 - cost.total_error)
                 hours.append(expected_hours)
                 megaqubits.append(cost.total_megaqubits)
                 valid_ns.append(n)
 
-        plt.plot(valid_ns, hours, color=color, label=name + ', hours')
-        plt.scatter(valid_ns, hours, color=color, s=11)
-        plt.plot(valid_ns, megaqubits, color=color, label=name + ', megaqubits', linestyle='--')
-        plt.scatter(valid_ns, megaqubits, color=color, s=11)
+        plt.plot(valid_ns, hours, color=color, label=name + ', hours', marker=marker)
+        plt.plot(valid_ns, megaqubits, color=color, label=name + ', megaqubits', linestyle='--', marker=marker)
 
     plt.xscale('log')
     plt.yscale('log')

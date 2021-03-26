@@ -1,0 +1,5 @@
+# NOTE: matplotlib requires a system dependency
+# sudo apt install python3-tk
+matplotlib
+pytest
+cirq==0.5.0

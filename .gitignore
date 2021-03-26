@@ -13,3 +13,6 @@ main.log
 main.out
 main.pdf
 mainNotes.bib
+
+.DS_Store
+*.bak
