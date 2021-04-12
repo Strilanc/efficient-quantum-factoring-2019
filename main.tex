@@ -113,7 +113,7 @@ We estimate the approximate cost of our construction using plausible physical as
  a surface code cycle time of 1 microsecond,
  and a reaction time of 10 microseconds.
 We account for factors that are normally ignored such as noise, the need to make repeated attempts, and the spacetime layout of the computation.
-When factoring 2048 bit RSA integers, our construction's spacetime volume is a hundredfold less than comparable estimates from earlier works (Fowler et al. 2012, Gheorghiu et al. 2019).
+When factoring 2048 bit RSA integers, our construction's spacetime volume is a hundredfold less than comparable estimates from earlier works (Van Meter et al. 2009, Jones et al. 2010, Fowler et al. 2012, Gheorghiu et al. 2019).
 In the abstract circuit model (which ignores overheads from distillation, routing, and error correction) our construction uses $3 n + 0.002 n \lg n$ logical qubits, $0.3 n^3 + 0.0005 n^3 \lg n$ Toffolis, and $500 n^2 + n^2 \lg n$ measurement depth to factor $n$-bit RSA integers.
 We quantify the cryptographic implications of our work, both for RSA and for schemes based on the DLP in finite fields.
 \end{abstract}
@@ -123,7 +123,7 @@ We quantify the cryptographic implications of our work, both for RSA and for sch
 \section{Introduction}
 \label{sec:introduction}
 Peter Shor's introduction in 1994 of polynomial time quantum algorithms for factoring integers and computing discrete logarithms \cite{shor1994,Timeline} was a historic milestone that greatly increased interest in quantum computing.
-Shor's algorithms were the first quantum algorithms that achieved an exponential speedup over classical algorithms, applied to problems outside the field of quantum mechanics, and had obvious applications.
+Shor's algorithms were the first quantum algorithms that achieved a superpolynomial speedup over classical algorithms, applied to problems outside the field of quantum mechanics, and had obvious applications.
 In particular, Shor's algorithms may be used to break the RSA cryptosystem \cite{rsa} based on the hardness of factoring integers that are the product of two similarly-sized primes (hereafter ``RSA integers"), and cryptosystems based on the discrete logarithm problem (DLP), such as the Diffie-Hellman key agreement protocol \cite{diffie-hellman} and the Digital Signature Algorithm \cite{fips-186-4}.
 
 The most expensive operation performed by Shor's factoring algorithm is a modular exponentiation.
@@ -132,7 +132,7 @@ These two facts may at first glance appear to suggest that factoring a thousand 
 The modular exponentiation in Shor's algorithm is performed over a superposition of exponents, meaning a quantum computer is required, and quantum hardware is expected to be many orders of magnitude noisier than classical hardware \cite{schroeder2009dram,Bare13,Kim2014}.
 This noise necessitates the use of error correction, which introduces overheads that ultimately make performing reliable arithmetic on a quantum computer many orders of magnitude more expensive than on classical computers \cite{fowler2012surfacecodereview, campbell2018constraintsatisfaction}.
 
-Although Shor's algorithms run in polynomial time, the constant factors hidden by the asymptotic notation are substantial.
+Although Shor's algorithms run in polynomial time, and although there has been significant historical work focusing on reducing the cost of Shor's algorithms and large scale quantum computing architectures \cite{vedral1996arithmetic,beckman1996efficient,cleve2000fast,oskin2002practical,copsey2003toward,bravyi2005distillation,whitney2009fault,van2010distributed,jones2012layered,pavlidis2012fast,fowler2012time,fowler2012surfacecodereview,horsman2012latticesurgery,fowler2018,ekeraa2016modifying} (summarized in \cite{vanquantumcomputerarchitecture}), the constant factors hidden by the asymptotic notation remain substantial.
 These constant factors must be overcome, by heavy optimization at all levels, in order to make the algorithms practical.
 Current quantum computers are far from being capable of executing Shor's algorithms for cryptographically relevant problem sizes.
 
@@ -165,8 +165,8 @@ The main hurdle to overcome is to implement one or more modular exponentiations 
                     &\multicolumn{3}{c}{Min Volume (megaqubitdays)}
                         \\
 \hline
-RSA Factoring Construction
-    &\multicolumn{3}{|c||}{Asymptotic}
+Factoring RSA integers
+    &\multicolumn{3}{c||}{Asymptotic}
         &$n=1024$ &$n=2048$ &$n=3072$
             &$n=1024$ &$n=2048$ &$n=3072$
                                 \\
@@ -260,8 +260,8 @@ H\"{a}ner et al. 2016 \cite{haner2016factoring}
             &{\boldmath $21$}
                 \\
 \hline
-ECC Log Construction
-    &\multicolumn{3}{|c||}{Asymptotic}
+Solving elliptic curve DLPs
+    &\multicolumn{3}{c||}{Asymptotic}
         &$n=160$ &$n=224$ &$n=256$
             &$n=160$ &$n=224$ &$n=256$
                 \\
@@ -279,8 +279,8 @@ Roetteler et al. 2017 \cite{roetteler2017quantum}
   \end{tabular}
   }
   \caption{
-    Expected costs of factoring RSA integers using various constructions.
-    Includes an elliptic curve DLP, with similar classical security, for comparison.
+    Expected costs of factoring $n$ bit RSA integers using various constructions proposed in the literature.
+    For comparison, we include a single construction for solving the DLP in $n$ bit prime order elliptic curve groups with comparable classical security levels.
     The estimated minimum spacetime volumes assume modern surface code constructions, even for older papers.
     See \app{table-details} for details on each entry in this table.
   }
@@ -318,13 +318,35 @@ estimate at $n=2048$
     &(megaqubitdays)
         \\
 \hline
+Van Meter et al. 2009 \cite{van2010distributed}
+    &0.2\%
+    &49
+    &N/A
+    &planar
+    &1000+ T and S
+    &distillation limited carry lookahead
+    &6500
+    &410
+    &2600000
+        \\
+Jones et al. 2010 \cite{jones2012layered}
+    &0.1\%
+    &0.25
+    &N/A
+    &planar
+    &7000 T
+    &distillation limited carry lookahead
+    &620
+    &10
+    &6200
+        \\
 Fowler et al. 2012 \cite{fowler2012surfacecodereview}
     &0.1\%
     &1
     &0.1
     &planar
     &1200 T
-    &single threaded
+    &reaction limited ripple carry
     &1000
     &1.1
     &1100
@@ -335,7 +357,7 @@ O'Gorman et al. 2017 \cite{ogorman2017factories}
     &1
     &arbitrary
     &block CCZ
-    &single threaded
+    &reaction limited ripple carry
     &230
     &3.7
     &850
@@ -346,7 +368,7 @@ Gheorghiu et al. 2019 \cite{gheorghiu2019cryptanalysis}
     &0.1
     &planar
     &1100 T
-    &single threaded
+    &reaction limited ripple carry
     &170
     &1
     &170
@@ -357,7 +379,7 @@ Gheorghiu et al. 2019 \cite{gheorghiu2019cryptanalysis}
     &10
     &planar
     &1 CCZ
-    &serial distillation
+    &distillation limited ripple carry
     &16
     &6
     &90
@@ -368,7 +390,7 @@ Gheorghiu et al. 2019 \cite{gheorghiu2019cryptanalysis}
     &10
     &planar
     &14 CCZ
-    &single threaded
+    &reaction limited ripple carry
     &19
     &0.36
     &6.6
@@ -379,7 +401,7 @@ Gheorghiu et al. 2019 \cite{gheorghiu2019cryptanalysis}
     &\textbf{10}
     &\textbf{planar}
     &\textbf{28 CCZ}
-    &\textbf{double threaded}
+    &\textbf{reaction limited carry runways}
     &\textbf{20}
     &\textbf{0.31}
     &\textbf{5.9}
@@ -388,9 +410,8 @@ Gheorghiu et al. 2019 \cite{gheorghiu2019cryptanalysis}
 }
   \caption{
     Historical estimates of the expected costs of factoring $n=2048$ bit RSA integers, and the assumptions they used.
-    Our spacetime volumes can be directly compared to the volume from Fowler et al. (we achieve a 165x improvement), because Fowler et al.'s estimate is dominated by distillation and changing the reaction time doesn't affect this volume.
-    It is unclear how to compare O'Gorman et al.'s volume to ours, because of the difference in connectivity.
-    Multiplying the volume from Gheorghiu et al. by 5, to account for the difference in cycle time, allows comparison to our volume (we achieve a 140x improvement).
+    We caution the reader to carefully consider the physical assumptions of each paper when comparing their expected volumes.
+    For example, assuming a cycle time that is 5x more optimistic will reduce the expected volume by a corresponding factor of 5.
     See \app{historical-table-details} for details on each entry in this table.
   }
 \end{table}
@@ -398,7 +419,7 @@ Gheorghiu et al. 2019 \cite{gheorghiu2019cryptanalysis}
 We use the standard square-and-multiply approach to reduce the exponentiations into a sequence of modular multiplications.
 We apply optimizations to reduce the number of multiplications and the cost of each multiplication.
 
-The number of multiplications is reduced by using windowed arithmetic \cite{van2005fastexponentiation,gidney2019windowedarithmetic}, which uses small table lookups to fuse several multiplications together.
+The number of multiplications is reduced by using windowed arithmetic \cite{van2005fastexponentiation,kutin2006shor,gidney2019windowedarithmetic}, which uses small table lookups to fuse several multiplications together.
 It is also reduced by using Ekerå and Håstad's derivatives \cite{ekeraa2016modifying, ekeraa2017quantum, ekeraa2017pp, ekeraa2018general} of Shor's algorithms, that require fewer multiplications to be performed  compared to Shor's original algorithms.
 
 The cost of each multiplication is reduced by combining several optimizations.
@@ -411,7 +432,7 @@ Finally, we optimize the overall computation by trying many possible parameter s
 
 We estimate the approximate cost of our construction, both in the abstract circuit model, and in terms of its runtime and physical qubit usage in an error corrected implementation under plausible physical assumptions for large-scale superconducting qubit platforms with nearest neighbor connectivity (see \fig{plot-costs}).
 Our physical estimates are based on the surface code \cite{fowler2012surfacecodereview}.
-We assume distance-$d$ logical qubits are stored using square patches of $2(d+1)^2$ physical qubits (see \fig{lattice-surgery-qubit}) and are operated on via lattice surgery \cite{horsman2012latticesurgery,fowler2018} (see \fig{lattice-surgery-board}).
+We assume distance-$d$ logical qubits are stored using square patches of $2(d+1)^2$ physical qubits (see \fig{lattice-surgery-qubit}) and are operated on via lattice surgery \cite{horsman2012latticesurgery,fowler2018}.
 We provide concrete cost estimates for several cryptographically relevant problems, such as the RSA integer factoring problem, and various parameterizations of the DLP in finite fields.
 These cost estimates may be used to inform decisions on when to mandate migration from currently deployed vulnerable cryptosystems to post-quantum secure systems or hybrid systems.
 
@@ -425,9 +446,9 @@ Ideally, we would like to compare our runtime and physical qubit usage to previo
 However, this is only possible when such estimates are actually reported and use physical assumptions similar to our own.
 The number of works for which this requirement is met is limited.
 
-The works by Fowler et al. \cite{fowler2012surfacecodereview} and Gheorgiu et al. \cite{gheorghiu2019cryptanalysis} stand out in that they use the same basic cost model as we use in this paper, enabling fair comparisons to be made.
+The works by Jones et al. \cite{jones2012layered}, Fowler et al. \cite{fowler2012surfacecodereview}, and Gheorgiu et al. \cite{gheorghiu2019cryptanalysis} stand out in that they use the same basic cost model as we use in this paper, enabling reasonable comparisons to be made.
 We improve on their estimates by over 100x (see \tbl{historical-comparison}) when accounting for slight remaining differences in the cost model.
-We also improve upon the cost estimates given by O'Gorman et al. \cite{ogorman2017factories}, even if a proper comparison is not possible as their physical assumptions are different from ours (they assume slower operations where all qubits are interconnected, which is typical of ion trap architectures, whilst we assume faster operations with nearest neighbor connectivity, which is typical of superconducting architectures).
+We also include other historical cost estimates \cite{van2010distributed,ogorman2017factories}, although in these cases the differences in physical assumptions are substantial.
 
 As most previous works focus either on factoring, or on the DLP in elliptic curve groups, it is hard to find references against which to compare our cost estimates for solving the DLP in multiplicative groups of finite fields.
 In general, the improvements we achieve for factoring RSA integers are comparable to the improvements we achieve for solving the general DLP in finite fields.
@@ -455,7 +476,7 @@ We do this because the relationship between $\lenexp$ and $n$ changes from probl
 
 \subsection{On the structure of this paper}
 
-The remainder of this paper is organized as follows.
+The remainder of this paper is organized as follows:
 In \sec{construction}, we describe our construction and the optimizations it uses, and show how to estimate its costs.
 We then proceed in
 \sec{impact} to describe how existing widely deployed cryptosystems are impacted by our work.
@@ -477,35 +498,34 @@ Finally, we summarize our contributions and their implications in \sec{conclusio
 In Shor's original algorithm \cite{shor1994}, composite integers $N$ that are not pure powers are factored by computing the order~$r$ of a randomly selected element $\gen \in \mathbb Z_N^*$.
 Specifically, period finding is performed against the function $f(e) = \gen^e$.
 This involves computing a modular exponentiation with $\lenexp=2n$ qubits in the exponent $e$.
-If $r$ is even and $\gen^{r/2} \not\equiv -1$, this yields non-trivial factors of $N$.
+If $r$ is even and $\gen^{r/2} \not\equiv -1$, which holds with probability at least $1/2$, this yields non-trivial factors of $N$.
 To see why, lift $\gen$ to $\mathbb Z$.
 As $\gen^r - 1 = (\gen^{r/2} - 1)(\gen^{r/2} + 1)
 \equiv 0 \pmod{N}$ it suffices to compute $\gcd((\gen^{r/2} \pm 1) \text{ mod } N, N)$ to factor $N$.
-The order $r$ is even with probability at least $1/2$.
-
 
 In \cite{ekeraa2016modifying,ekeraa2017quantum,ekeraa2017pp}, Ekerå and Håstad explain how to factor RSA integers $N = pq$ in a different way; namely by computing a short discrete logarithm.
 This algorithm proceeds as follows:
-First $y = \gen^{N+1}$ is computed classically, where as before $\gen$ is randomly selected from $\mathbb Z_N^*$ and of unknown order~$r$.
-Then the discrete logarithm $d = \log_{\gen} y \equiv p + q \pmod{r}$ is computed quantumly.
+First $y = \gen^{N+1}$ is computed classically, where as before~$\gen$ is randomly selected from $\mathbb Z_N^*$ and of unknown order~$r$.
+Then the discrete logarithm $d = \log_{\gen} y \equiv p + q \pmod{r}$ is computed on the quantum computer.
 To see why $d \equiv p + q \pmod{r}$, note that $\mathbb Z_N^*$ has order $\phi(N) = (p-1)(q-1)$ by Euler's totient theorem, so $d \equiv pq + 1 \equiv p + q \pmod{r}$ as $r$ divides $\phi(N)$ and $pq + 1 \equiv p + q \pmod{\phi(N)}$, with equality if $r > p + q$.
-
 For large random RSA integers, the order $r > p + q$ with overwhelming probability.
 Hence, we may assume $d = p + q$.
 By using that $N = pq$ and $d=p+q$, where $N$ and $d$ are both known, it is trivial to deterministically recover the factors $p$ and $q$ as the roots of the quadratic equation $p^2 - dp + N = 0$.
 
 The quantum part of Ekerå and Håstad's algorithm is similar to the quantum part of Shor's algorithm, except for the following important differences:
-there are two exponents $e_1, e_2$, of lengths $2m$ and $m$ qubits, respectively, for $m$ a positive integer such that $p + q < 2^m$.
+there are two exponents $e_1, e_2$, of lengths $2m$ and $m$ qubits respectively.
+The value $m$ is a positive integer that must satisfy $p + q < 2^m$.
+We set $m = 0.5n + O(1)$.
 Period finding is performed against the function $f(e_1, e_2) = \gen^{e_1} y^{-e_2}$ rather than the function $f(e)=\gen^e$.
 The total exponent length is hence $n_e = 3m = 1.5n + O(1)$ qubits, compared to $2n$ qubits in Shor's algorithm.
-It is this reduction in the exponent length that translates into a reduction in the overall number of multiplications that need to be performed on the quantum computer.
+It is this reduction in the exponent length that translates into a reduction in the overall number of multiplications that need to be performed quantumly.
 
-The two exponent registers are initialized to uniform superpositions of all $2^m$ and $2^{2m}$ values, respectively, and two quantum Fourier transforms are applied independently to the two registers.
+The two exponent registers are initialized to uniform superpositions of all $2^{2m}$ and $2^{m}$ values, respectively, and two quantum Fourier transforms are applied independently to the two registers.
 This implies that standard optimization techniques, such as the square-and-multiply technique, the semi-classical Fourier transform of Griffiths and Niu \cite{griffiths1996semiclassical}, recycling of qubits in the exponent registers \cite{mosca1999recycle, parker2000recycle}, and so forth, are directly applicable.
 
 The classical post-processing algorithm used to extract the logarithm from the observed frequencies is by necessity different from Shor's.
 It uses lattice-based techniques, and critically does not require $r$ to be known.
-Ekerå shows in \cite{ekeraa2017pp} that the post-processing algorithm has probability above $99\%$ of recovering $d$.
+Ekerå shows in~\cite{ekeraa2017pp} that the post-processing algorithm has probability above $99\%$ of recovering $d$.
 As the factors $p$ and $q$ are recovered deterministically from $d$ and $N$, this implies that it in general suffices to run the quantum algorithm once.
 
 In summary, Ekerå and Håstad's algorithm is similar to Shor's algorithm from an implementation perspective:
@@ -516,14 +536,14 @@ This fact, coupled with the fact that the algorithms of Ekerå and Håstad may b
 
 Note that the above description of the algorithm has been somewhat simplified compared to the algorithm described in \cite{ekeraa2017quantum, ekeraa2017pp} in the interest of improved legibility.
 Furthermore, there are technical conditions that need to be respected for the analysis in \cite{ekeraa2017pp} to be applicable.
-For the full details, see section A.2.1 of \cite{ekeraa2017pp}.
+For the full details, see Appendix~A.2.1 of \cite{ekeraa2017pp}.
 
 \subsection{Reference implementation}
 
 To avoid overloading the reader, we will describe our factoring construction by starting from a simple reference implementation of the quantum part of Shor's original algorithm and then apply optimizations one by one.
 
 The reference implementation works the way most implementations of Shor's algorithm do, by decomposing exponentiation into iterative controlled modular multiplication \cite{vedral1996arithmetic, zalka1998fast, zalka2006pure, beauregard2002shor, haner2016factoring, gidney2017factoring}.
-A register $\productreg$ is initialized into the $|1\rangle$ state, then a controlled modular multiplication of the classical constant $\gen^{2^j} \pmod{N}$ into $\productreg$ is performed, controlled by the qubit $e_j$ from the exponent $e$, for each integer $j$ from $\lenexp-1$ down to $0$.
+A register $\productreg$ is initialized to the $|1\rangle$ state, then a controlled modular multiplication of the classical constant $\gen^{2^j} \pmod{N}$ into $\productreg$ is performed, controlled by the qubit $e_j$ from the exponent $e$, for each integer $j$ from $\lenexp-1$ down to $0$.
 After the multiplications are done, $\productreg$ is storing $\gen^e \pmod{N}$ and measuring $\productreg$ completes the hard part of Shor's algorithm.
 
 Controlled modular multiplication is still not a primitive operation, so it must also be decomposed.
@@ -545,7 +565,7 @@ Before proceeding, note that we focus exclusively on costing the controlled modu
 This is because they constitute the hard part of Shor's algorithm from an implementation perspective.
 The other part of the algorithm, the quantum Fourier transform (QFT), can be implemented semi-classically \cite{griffiths1996semiclassical} and interleaved with the controlled modular multiplications.
 
-When the QFT is implemented in this manner (see~\fig{exponent-grouping}) it suffices to have control qubits for the window of controlled modular multiplications currently being processed, as these control qubits may be recycled \cite{mosca1999recycle, parker2000recycle}. In the QFT, a sequence of classically controlled gates that shift the phase by $2\pi/2^k$ for various integers $k$ up to the QFT dimension are applied to the control qubit for each modular multiplication.
+When the QFT is implemented in this manner (see~\fig{exponent-grouping}) it suffices to have control qubits for the window of controlled modular multiplications currently being processed, as these control qubits may be recycled \cite{mosca1999recycle, parker2000recycle}. In the QFT, a sequence of classically controlled gates that shift the phase by $2\pi/2^k$ for various integers $k$ up to the QFT dimension are applied to the control qubit for each modular multiplication.
 This sequence can be combined into a single shift, and implemented using e.g. the technique in \cite{bocharov2015rus}, to a level of precision far below other sources of error in the algorithm without incurring a noticeable cost. This implies that the cost of implementing the QFT is negligible.
 
 Note furthermore that when we analyze the success probabilities of Shor's algorithms, and the various derivatives, we assume the use of an ideal QFT even though the implemented QFT is technically an approximation.
@@ -555,7 +575,7 @@ Note furthermore that when we analyze the success probabilities of Shor's algori
 Following Zalka \cite{zalka2006pure}, the first improvement we make over the reference implementation is to switch from the usual representation of integers to the coset representation of modular integers.
 The usual representation of an integer $k$ in a quantum computer is the computational basis state $|k\rangle$.
 The coset representation is different: it uses a periodic superposition with period $N$ and offset $k$.
-In ideal conditions, the integer $k \pmod{N}$ is represented by the state $\sqrt{2^{-\gpad}} \sum_{j=0}^{2^\gpad-1} |jN + k\rangle$ where $\gpad$ is the number of additional padding qubits placed at the end of the register.
+In ideal conditions, the integer $k \pmod{N}$ is represented by the state $\sqrt{2^{-\gpad}} \sum_{j=0}^{2^\gpad-1} |jN + k\rangle$ where $\gpad$ is the number of additional padding qubits placed at the end of the register after the high order bits.
 The key idea is that the periodicity of the superposition causes a non-modular adder to perform approximate modular addition on this representation, and the error of the approximation can be exponentially suppressed by adding more padding to the register.
 
 As we will discuss later, the amount of padding required is logarithmic in the number of operations.
@@ -565,7 +585,7 @@ Therefore switching to the coset representation reduces the leading asymptotic t
 
 \subsection{Windowed arithmetic}
 
-The next optimization we use is windowed arithmetic.
+The next optimization we use is windowed arithmetic \cite{van2005fastexponentiation,kutin2006shor,gidney2019windowedarithmetic}.
 Specifically, we follow the modular exponentiation construction from \cite{gidney2019windowedarithmetic} and use windowing at two levels.
 
 First, at the level of a multiplication, we window over the controlled additions.
@@ -597,17 +617,19 @@ Small windows of the qubits that would have been used as controls for the additi
 
 Second, at the level of the exponentiation, we window over the controlled multiplications.
 This is done by including exponent qubits in the addresses of all lookups being performed within the multiplications.
-We refer the reader to \cite{gidney2019windowedarithmetic} for the exact details of this nested windowed arithmetic construction.
+We refer the reader to~\cite{gidney2019windowedarithmetic} for the exact details of this nested windowed arithmetic construction.
 
 The cost of windowed arithmetic depends on the size of the windows.
 Let $\gexp$ be the size of the window over exponent qubits that are being used to control multiplications.
+Increasing $\gexp$ proportionally decreases the number of multiplications needed for the modular exponentiation, since more exponent qubits are handled by each multiplication.
 Let $\gmul$ be the size of the window over factor qubits being used to control additions.
-Using these parameters, the $\lenexp$ controlled multiplications we needed to perform become $\lenexp / \gexp$ uncontrolled multiplications while the $2 n$ controlled additions we needed to perform within each multiplication become $2 n / \gmul$ uncontrolled additions.
-The tradeoff is that each addition is now accompanied by a lookup with an address of size $\gexp + \gmul$.
+Increasing $\gmul$ proportionally decreases the number of additions needed within each multiplication.
+By using windowed arithmetic, the $\lenexp$ controlled multiplications we needed to perform become $\lenexp / \gexp$ uncontrolled multiplications while the $2 n$ controlled additions we needed to perform within each multiplication become $2 n / \gmul$ uncontrolled additions.
+The cost of increasing $\gexp$ and $\gmul$ is that each addition is now accompanied by a lookup, and the Toffoli count of lookup operation is $2^{\gexp + \gmul}$.
 
 Using Cuccaro et al.'s adder \cite{cuccaro2004adder}, each $n$-bit addition has a Toffoli count and measurement depth of $2n$.
 Using Babbush et al.'s QROM read (section 3A of \cite{babbush2018}), each table lookup has a Toffoli count and measurement depth of $2^{\gmul+\gexp}$ and uses a negligible $O(\gmul + \gexp)$ ancillae.
-Using measurement based uncomputation (appendix C of \cite{berry2019qubitization}), uncomputing each table lookup has a Toffoli count and measurement depth of $2 \sqrt{2^{\gmul + \gexp}}$ which is negligible compared to the lookup for the parameters we will be using.
+Using measurement based uncomputation (appendix~C of \cite{berry2019qubitization}), uncomputing each table lookup has a Toffoli count and measurement depth of $2 \sqrt{2^{\gmul + \gexp}}$ which is negligible compared to the lookup for the parameters we will be using.
 The measurement based uncomputation uses $\text{max}(0, \sqrt{2^{\gmul + \gexp}} - n)$ ancillae (it starts by measuring away $n$ logical qubits of the lookup output register).
 This ancillae count is always zero for the reasonable values of $\gmul, \gexp$, and classically intractable values of $n$, that we consider in this paper.
 The overhead due to the logarithmic padding introduced by the coset representation of modular integers is logarithmic in $n$.
@@ -656,6 +678,14 @@ Runways allow large additions to be performed piecewise, with each piece being w
 As with the coset representation of modular integers, circuits using oblivious carry runways approximate the original circuit instead of perfectly reproducing it.
 But, as we will discuss later, increasing the runway length $\gpad$ exponentially suppresses the approximation error.
 
+For the full details of how to add, maintain, and remove oblivious runways we refer the reader to \cite{gidney2019approximatepermutation}.
+That being said, we will point out one optimization not mentioned in that paper which applies here.
+Note that, ultimately, each register we add carry runways to is going to either be measured or discarded.
+The last thing that would happen to these registers, before they were measured or discarded, is carry runway removal.
+However, the carry runway removal process is classical; it can be constructed out of Toffoli gates.
+As a result, the carry runway removal process does not need to be performed under superposition.
+The register qubits and runway qubits can simply be measured just before the runways would have been removed, and the runway removal process can be performed by classical post-processing of the measurements.
+
 Note that we use $\gpad$ for both the runway length of oblivious carry runways and the padding length of the coset representation.
 We do this because they have identical error mechanisms, namely unwanted carries into the extra qubits.
 There is negligible benefit in suppressing one more than the other.
@@ -690,7 +720,7 @@ We could reduce the runways to zero qubits, but this would require propagating t
 \subsection{Abstract circuit model cost estimate}
 
 We have now described all the details necessary to estimate the cost of our implementation in the abstract circuit model.
-The cost depends on the two parameters specified by the problem (the input size $n$ and the number of exponent qubits $\lenexp$) and also the four controllable parameters we have discussed (the exponentiation window size $\gexp$, the multiplication window size $\gmul$, the runway separation $\gsep$, and the padding/runway length $\gpad$).
+The cost depends on the two parameters specified by the problem (the input size $n$ and the number of exponent qubits $\lenexp$) and also the four controllable parameters we have discussed (the exponentiation window size~$\gexp$, the multiplication window size $\gmul$, the runway separation $\gsep$, and the padding/runway length $\gpad$).
 
 Although we do consider alternate values when producing tables and figures, in general we have found that the settings $\gexp=\gmul=5, \gsep=1024, \gpad=2 \lg n + \lg \lenexp + 10 \approx 3 \lg n + 10$ work well.
 In this overview we will focus on these simple, though slightly suboptimal, values.
@@ -743,7 +773,7 @@ Rather, they are approximations.
 This is not a problem in practice, as we may bound the approximation error using concepts and results from \cite{gidney2019approximatepermutation}.
 
 The oblivious runways and the coset representation of modular integers are both examples of ``approximate encoded permutations" which have a ``deviation".
-When using a padding/runway length of $\gpad$, and a runway separation of $\gsep$, the deviation per addition is at most $\frac{n}{\gsep 2^{\gpad}}$.
+When using a padding/runway length of $\gpad$, and a runway separation of~$\gsep$, the deviation per addition is at most $n / (\gsep 2^{\gpad})$.
 Deviation is subadditive under composition, so the deviation of the entire modular exponentiation process is at most the number of lookup additions times the deviation per addition.
 
 We can use this to check how much deviation results from using $\gpad = 2 \lg n + \lg \lenexp + 10$, which we so far have merely claimed would be sufficient:
@@ -753,6 +783,7 @@ We can use this to check how much deviation results from using $\gpad = 2 \lg n 
     \text{TotalDeviation}(n, \lenexp)
     &\leq \text{LookupAdditionCount}(n, \lenexp) \cdot \frac{n}{\gsep 2^{\gpad}}
     \\&\approx 0.1 \lenexp n \frac{n}{1024 \cdot 2^{2 \lg n + \lg \lenexp + 10}}
+    \\&\approx 0.1 \frac{n^2 \lenexp}{1024 \cdot n^2 \lenexp \cdot 2^{10}}
     \\&= 0.1 \frac{1}{1024 \cdot 2^{10}}
     \\&\approx 10^{-7}
 \end{aligned}
@@ -769,10 +800,13 @@ This is significantly lower than other error rates we will calculate.
         \includegraphics{assets/data-over-time-plot.png}
     }
     \caption{
-        How the computation is roughly laid out over time during the lookup-add-unlookup inner loop of our construction, as generalized from \cite{gidney2019autoccz}.
+        Space usage during the key lookup-add-unlookup inner loop of our construction.
         During lookup, the target register is spread out to make room for the temporary register that will hold the lookup's output.
         During addition the target register and lookup output register are squeezed through a moving operating area that sweeps up then down, applying the MAJ and UMA sweeps of Cuccaro's adder.
         Uncomputing the lookup is done with measurement based uncomputation \cite{berry2019qubitization}, which is overlapped slightly with the UMA sweep (this is why the yellow rows disappear early).
+        ``CCZ factory" space is being used to produce CCZ states.
+        ``CCZ fixup" space is being used to convert the CCZ states into AutoCCZ states \cite{gidney2019autoccz}.
+        ``MAJ/UMA" space is being used to perform a ripple carry addition, fueled by AutoCCZ states, of the temporary register (the result of the lookup) into the target register.
     }
 \end{figure}
 
@@ -798,7 +832,7 @@ The lookup before each addition prepares registers across the pieces, as shown i
 
 The width of each piece is determined by the number of CCZ factories needed to run at the reaction limited rate.
 This number is 14, assuming a code distance of 27 and using the CCZ factories from \cite{gidney2019autoccz, gidney2018magic}.
-Also, assuming a level 1 code distance of 17, the footprint of the factory is 15x8 \cite{gidney2019autoccz}.
+Also, assuming a level~1 code distance of 17, the footprint of the factory is 15x8 \cite{gidney2019autoccz}.
 The factories are laid out into 2 rows of 7, with single logical qubit gaps to allow space for data qubits to be routed in and out.
 The total width of a piece is $15\cdot 7 + 7 = 113$ logical qubits.
 
@@ -810,25 +844,27 @@ So, overall, when working on a problem of size $n$, the computation covers a $11
 
 \begin{figure}[p]
     \label{fig:addition-layout-2d}
-    \resizebox{\linewidth}{!}{
+    \resizebox{0.9\linewidth}{!}{
         \includegraphics{assets/adder-layout-2d.png}
     }
     \captionof{figure}{
-        Data layout during a parallel addition, as generalized from \cite{gidney2019autoccz}.
+        Data layout during a parallel addition.
+        Corresponds to one of the ``addition" columns from \fig{time-bars}.
         To scale, assuming a 2048 bit number is being factored.
-        The left and right halfs of the computer run completely independently and in parallel.
+        The left and right halves of the computer run completely independently and in parallel.
         The factories (red boxes and pink boxes) are feeding AutoCCZ states into the blue area, which is rippling the carry bit back and forth as the offset and target register data (green and yellow rows) is routed through gaps between the factories to the other side.
     }
 \end{figure}
 
 \begin{figure}[p]
     \label{fig:lookup-layout}
-    \resizebox{\linewidth}{!}{
+    \resizebox{0.9\linewidth}{!}{
         \includegraphics{assets/lookup-layout-2d.png}
     }
     \caption{
         Data layout during a table lookup, as generalized from \cite{gidney2019autoccz}.
         To scale, assuming a 2048 bit number is being factored.
+        Corresponds to the center ``lookup" column from \fig{time-bars}.
         The factories (red boxes and pink boxes) are feeding AutoCCZ states into the dark gray region, which is performing the unary iteration part of a table lookup computation.
         There are enough factories, and enough work space, to run the lookup at double speed, made possible by the fact that every qubit in the lookup output register (yellow) is adjacent to two access hallways.
         The target register (green rows) and factor register (blue rows) are idle, except that a few qubits from the factor register are being used as address bits in the table lookup.
@@ -841,7 +877,10 @@ So, overall, when working on a problem of size $n$, the computation covers a $11
         \includegraphics{assets/adder-layout-3d.png}
     }
     \captionof{figure}{
-        Surface code activity during an addition, as generalized from \cite{gidney2019autoccz}.
+        Spacetime layout during part of an addition.
+        Time moves upward and has been truncated.
+        Corresponds to one of the ``addition" columns from \fig{time-bars}.
+        Tiny gray squares are the size of one logical qubit.
         Yellow and green rows are qubits from the target and input registers of the addition.
         Dark blue rows are qubits from an idle register.
         Red boxes are CCZ magic state factories, turned into AutoCCZ states by the pink boxes.
@@ -927,34 +966,68 @@ The estimate in the title is produced by the ancillary file ``estimate\_costs.py
 \begin{figure}[ht]
     \label{fig:lattice-surgery-qubit}
     \resizebox{0.85 \linewidth}{!}{
-        \includegraphics{assets/qubit-patch-sizes.png}
+        \includegraphics{assets/lattice-qubits.pdf}
     }
+    % StabilizerConfigurationDiagram(r"""
+    %                 X               X       X               X       X       X       X       X
+    %               / \             / \     / \             / \     / \     / \     / \     / \
+    %           o   o   o       o   o   o   o   o       o   o   o   o   o   o   o   o   o   o   o
+    %          / \ / \ /       / \ / \ / \ / \ /       / \ / \ / \ / \ / \ / \ / \ / \ / \ / \ /
+    %         Z   X   Z       Z   X   Z   X   Z       Z   X   Z   X   Z   X   Z   X   Z   X   Z
+    %          \ / \ / \       \ / \ / \ / \ / \       \ / \ / \ / \ / \ / \ / \ / \ / \ / \ / \
+    %           o   o   o       o   o   o   o   o       o   o   o   o   o   o   o   o   o   o   o
+    %           \ / \ / \       \ / \ / \ / \ / \       \ / \ / \ / \ / \ / \ / \ / \ / \ / \ / \
+    %             Z   X   Z       Z   X   Z   X   Z       Z   X   Z   X   Z   X   Z   X   Z   X   Z
+    %           / \ / \ /       / \ / \ / \ / \ /       / \ / \ / \ / \ / \ / \ / \ / \ / \ / \ /
+    %           o   o   o       o   o   o   o   o       o   o   o   o   o   o   o   o   o   o   o
+    %           \ /           / \ / \ / \ / \ /       / \ / \ / \ / \ / \ / \ / \ / \ / \ / \ /
+    %             X           Z   X   Z   X   Z       Z   X   Z   X   Z   X   Z   X   Z   X   Z
+    %                          \ / \ / \ / \ / \       \ / \ / \ / \ / \ / \ / \ / \ / \ / \ / \
+    %                           o   o   o   o   o       o   o   o   o   o   o   o   o   o   o   o
+    %                           \ / \ / \ / \ / \       \ / \ / \ / \ / \ / \ / \ / \ / \ / \ / \
+    %                 X           Z   X   Z   X   Z       Z   X   Z   X   Z   X   Z   X   Z   X   Z
+    %               / \         / \ / \ / \ / \ /       / \ / \ / \ / \ / \ / \ / \ / \ / \ / \ /
+    %           o   o   o       o   o   o   o   o       o   o   o   o   o   o   o   o   o   o   o
+    %          / \ / \ /         \ /     \ /           / \ / \ / \ / \ / \ / \ / \ / \ / \ / \ /
+    %         Z   X   Z           X       X           Z   X   Z   X   Z   X   Z   X   Z   X   Z
+    %          \ / \ / \                               \ / \ / \ / \ / \ / \ / \ / \ / \ / \ / \
+    %           o   o   o                               o   o   o   o   o   o   o   o   o   o   o
+    %           \ / \ / \                               \ / \ / \ / \ / \ / \ / \ / \ / \ / \ / \
+    %             Z   X   Z           X       X           Z   X   Z   X   Z   X   Z   X   Z   X   Z
+    %           / \ / \ /           / \     / \         / \ / \ / \ / \ / \ / \ / \ / \ / \ / \ /
+    %           o   o   o       o   o   o   o   o       o   o   o   o   o   o   o   o   o   o   o
+    %           \ /           / \ / \ / \ / \ /       / \ / \ / \ / \ / \ / \ / \ / \ / \ / \ /
+    %             X           Z   X   Z   X   Z       Z   X   Z   X   Z   X   Z   X   Z   X   Z 
+    %                          \ / \ / \ / \ / \       \ / \ / \ / \ / \ / \ / \ / \ / \ / \ / \                                             
+    %                           o   o   o   o   o       o   o   o   o   o   o   o   o   o   o   o                                             
+    %                           \ / \ / \ / \ / \       \ / \ / \ / \ / \ / \ / \ / \ / \ / \ / \                                             
+    %                 X           Z   X   Z   X   Z       Z   X   Z   X   Z   X   Z   X   Z   X   Z                                             
+    %               / \         / \ / \ / \ / \ /       / \ / \ / \ / \ / \ / \ / \ / \ / \ / \ /                                             
+    %           o   o   o       o   o   o   o   o       o   o   o   o   o   o   o   o   o   o   o                                             
+    %          / \ / \ /       / \ / \ / \ / \ /       / \ / \ / \ / \ / \ / \ / \ / \ / \ / \ /                                             
+    %         Z   X   Z       Z   X   Z   X   Z       Z   X   Z   X   Z   X   Z   X   Z   X   Z                                            
+    %          \ / \ / \       \ / \ / \ / \ / \       \ / \ / \ / \ / \ / \ / \ / \ / \ / \ / \                                            
+    %           o   o   o       o   o   o   o   o       o   o   o   o   o   o   o   o   o   o   o                                            
+    %           \ / \ / \       \ / \ / \ / \ / \       \ / \ / \ / \ / \ / \ / \ / \ / \ / \ / \                                            
+    %             Z   X   Z       Z   X   Z   X   Z       Z   X   Z   X   Z   X   Z   X   Z   X   Z                                            
+    %           / \ / \ /       / \ / \ / \ / \ /       / \ / \ / \ / \ / \ / \ / \ / \ / \ / \ /                                            
+    %           o   o   o       o   o   o   o   o       o   o   o   o   o   o   o   o   o   o   o                                            
+    %           \ /             \ /     \ /             \ /     \ /     \ /     \ /     \ /                                                
+    %             X               X       X               X       X       X       X       X
+    % """)
     \caption{
-        Lattice surgery qubits, in the rotated surface code, with code distances $d$ of (from left to right) 3, 5, 7, 9, 11, and 13.
-        Each green (blue) square correspond to physical X (Z) measurement qubit.
-        Each white square corresponds to a physical data qubit.
-        Blacked out regions correspond to disabled qubits.
-        The two types of boundaries are highlighted with blue and green borders.
-        There are $2 (d+1)^2$ physical qubits per logical qubit (including the dividers).
-        With a physical error rate of $10^{-3}$, each increase of the code distance by 2 suppresses logical errors per surface code cycle by a factor of 10.
+        Stabilizer configuration diagrams for lattice surgery qubits in the rotated surface code with code distances $d$ of (from left to right) 3, 5, and 11.
+        Each small yellow circle is a data qubit.
+        Each filled shape is a stabilizer that is measured each surface code cycle.
+        Black squares are four body Z stabilizers, gray squares are four body X stabilizers, black semi-circles are two body Z stabilizers, and gray semi-circles are two body X stabilizers.
+        Not all physical qubits are shown; in particular there is a measurement qubit present for each stabilizer.
+        There are $2 (d+1)^2$ physical qubits per logical qubit, including the spacing between logical qubits.
+        We assume that each increase of the code distance by 2 suppresses logical errors per surface code cycle by a factor of 10 and that this is achieved with a physical error rate of $10^{-3}$.
     }
 \end{figure}
 
 
-\begin{figure}[ht]
-    \label{fig:lattice-surgery-board}
-    \resizebox{0.85 \linewidth}{!}{
-        \includegraphics{assets/lattice-board.png}
-    }
-    \caption{
-        Physical view and logical view of lattice surgery qubits during a computation.
-        The vertical columns (right) are logical qubits, corresponding to patches in the physical layout (left).
-        The horizontal bar/region corresponds to a stabilizer measurement of the product of the two connected qubits (times whatever else is connected) \cite{fowler2018}.
-        The connections shown in the 3d diagram correspond to missing boundaries in the physical layout, and indicate that physical stabilizer measurements are crossing between the two regions instead of staying separated.
-    }
-\end{figure}
-
-\subsection{Summary}
+\subsection{Construction summary}
 
 We now review the basic flow of our implementation of Shor's algorithm, including some details we would have otherwise left unstated.
 
@@ -984,6 +1057,30 @@ For example, during a windowed multiplication, one of the registers is essential
 We have not discussed how these qubits are routed into and out of the lookup computation as they are needed.
 It is simply clear that there is enough leeway, in the packing of the computation into spacetime, for this routing task to be feasible and contribute negligible cost.
 
+
+\subsection{Other physical gate error rates}
+
+Throughout this paper, we focus primarily on a physical gate error rate of $0.1\%$, because we consider this error rate to be plausibly achievable by quantum hardware, yet sufficiently low to enable error correction with the surface code.
+
+This being said, it is of course important to be conservative when estimating the security of cryptographic schemes.
+The reader may therefore also be interested in estimates for lower error rates.
+With this in mind, in addition to including a $0.01\%$ curve in \fig{plot-costs}, we present the following rule of thumb for translating to other error rates:
+$$V(p) \approx V(0.1\%) / (-\log_{10}(p) - 2)^3$$
+
+Here $V(p)$ is the expected spacetime volume, assuming a physical gate error rate of $p$.
+The rule of thumb is based on the following observation:
+Each time the code distance of a construction is increased by 2, logical errors are suppressed by a factor roughly equal to the ratio between the code's threshold error rate and the hardware's physical error rate.
+The surface code has a threshold error rate of around $1\%$.
+For example, this means that at a physical error rate of $0.01\%$ you suppress logical errors by 100x each time you increase the code distance by 2, whereas at a physical error rate of $0.1\%$ the same suppression factor would require increasing the code distance by 4.
+Consequently, code distances tend to be half as large at a physical error rate of $0.01\%$.
+The code distance is a linear measure, and we are packing the computation into a three-dimensional space (one of the dimensions being time), so proportional improvements to the code distance get cubed.
+
+Hence the idea is that at a physical error rate of $0.01\%$ code distances are half as big, meaning the computational pieces being packed into spacetime are $2^3 = 8$ times smaller, meaning in turn that the optimal packing will also be roughly eight times smaller.
+Similarly, at a physical error rate of $0.001\%$, code distances are a third as big, so spacetime volumes should be roughly 27 times smaller.
+
+Of course, this rule of thumb is imperfect.
+For example, it does not account for the fact that code distances have to be rounded to integer values, or for the fact that the spacetime tradeoffs being made have to change due to the reaction time of the control system staying constant as the code distance changes, or for the fact that at really low error rates you would switch to different error correcting codes.
+Regardless, for order of magnitude estimates involving physical error rates between $0.3\%$ and $0.001\%$, we consider this rule of thumb to be a sufficient guide.
 
 
 
@@ -1024,15 +1121,14 @@ We combine these error probabilities, assuming independence, to derive an upper 
 We chose to optimize the quantity $s^{1.2} \cdot t / (1 - \epsilon)$, which we refer to as the ``skewed expected spacetime volume".
 The $t / (1 - \epsilon)$ factor is the expected runtime, and the $s^{1.2}$ factor grows slightly faster than the space usage.
 We skew the space usage when optimizing because we have a slight preference for decreasing space usage over decreasing runtime.
-We consider all combination of parameters $(\distone, \, \disttwo, \, \devoff, \, \gmul, \, \gexp, \, \gsep)$, choose the set that minimizes the skewed expected spacetime volume, and report the corresponding estimated costs.
+We consider all combinations of parameters $(\distone, \, \disttwo, \, \devoff, \, \gmul, \, \gexp, \, \gsep)$, choose the set that minimizes the skewed expected spacetime volume, and report the corresponding estimated costs.
 
 \subsection{Implications for RSA}
 Today, the arguably most commonly used modulus size for RSA is $n=2048$ bits.
 Larger moduli are however in widespread use and smaller moduli have been used historically.
-The best published academic record is the factorization of a $768$ bit RSA modulus in 2009, see~\cite{kleinjung-rsa768} for details.
-The factorization of a $795$ bit RSA modulus was announced in December 2019 on a number theory mailing list, see~\cite{thome-rsa795}, but no further details have as of yet been published.
+The best published academic record is the factorization of an $829$~bit RSA modulus in~2020, see~\cite{boudot-rsa829} for details regarding this computation.
 
-In~\tbl{impact-ifp-rsa} and \fig{plot-costs}, we provide etimates for the resource and time requirements for attacking RSA for various cryptographically relevant modulus lengths $n$. The estimates are for factoring RSA integers with Ekerå-Håstads's algorithm \cite{ekeraa2017quantum,  ekeraa2017pp} that computes a short discrete logarithm, see the appendix to \cite{ekeraa2017pp} for full technical details. As is explained in \cite{ekeraa2017pp}, a single correct run of this quantum algorithm suffices for the RSA integer to be factored with at least $99\%$ success probability in the classical post-processing.
+In~\tbl{impact-ifp-rsa} and \fig{plot-costs}, we provide estimates for the resource and time requirements for attacking RSA for various cryptographically relevant modulus lengths $n$. The estimates are for factoring RSA integers with Ekerå-Håstad's algorithm \cite{ekeraa2017quantum,  ekeraa2017pp} that computes a short discrete logarithm, see the appendix to \cite{ekeraa2017pp} for full technical details. As is explained in \cite{ekeraa2017pp}, a single correct run of this quantum algorithm suffices for the RSA integer to be factored with at least $99\%$ success probability in the classical post-processing.
 
 \begin{table}[h!]
 \begin{center}
@@ -1098,21 +1194,21 @@ Given a generator $\gen$ of an order $r$ subgroup to $\mathbb Z^*_N$, where the 
 
 As $\mathbb Z_N^*$ has order $N-1$, it must be that $r$ divides $N-1$, so $N = 2rk+1$ for some integer $k \ge 1$. The asymptotically best currently known classical algorithms for computing discrete logarithms in subgroups of this form are generic cycle-finding algorithms, such as Pollard's $\rho$- and $\lambda$-algorithms \cite{pollard-rho-lambda}, that run in time $O(\sqrt{r})$ and $O(\sqrt{d})$, respectively, and the general number field sieve (GNFS), that runs in subexponential time in the bit length $n$ of $N$.
 
-The  idea of factoring via algebraic number fields was originally introduced by Pollard \cite{pollard-cubic} for integers on special forms. It was over time generalized, by amongst others Buhler et al. \cite{buhler-nfs}, Lenstra et al. \cite{lenstra-nfs} and Pollard \cite{pollard-nfs-sieving}, to factor general integers, and modified by amongst others Gordon \cite{gordon} and Schirokauer \cite{schirokauer-thesis, schirokauer} to compute discrete logarithms in finite fields. Much research effort has since been devoted to optimizing the GNFS in various respects. For a proper in-depth historical account of the development of the GNFS, see \cite{nfs-book, pomerance1996atale}.
+The  idea of factoring via algebraic number fields was originally introduced by Pollard \cite{pollard-cubic} for integers on special forms. It was over time generalized, by amongst others Buhler et al. \cite{buhler-nfs}, Lenstra et al. \cite{lenstra-nfs} and Pollard \cite{pollard-nfs-sieving}, to factor general integers, and modified by amongst others Gordon \cite{gordon} and Schirokauer \cite{schirokauer-thesis, schirokauer} to compute discrete logarithms in finite fields. Much research effort has since been devoted to optimizing the GNFS in various respects. For an in-depth historical account of the development of the GNFS, see \cite{nfs-book, pomerance1996atale}. For the best academic record, see~\cite{boudot-rsa829}.
 
-Let $z$ be number of bits of security provided by the modulus with respect to classical attacks using the GNFS. Let $n_d$ and $n_r$ be the lengths in bits of $d$ and $r$, respectively. It then suffices to pick $n_d, n_r \ge 2z$ to achieve $z$ bits of classical security, as the generic cycle-finding algorithms are then not more efficient than the GNFS.
+Let $z$ be the number of bits of security provided by the modulus with respect to classical attacks using the GNFS. Let $n_d$ and $n_r$ be the lengths in bits of $d$ and $r$, respectively. It then suffices to pick $n_d, n_r \ge 2z$ to achieve $z$ bits of classical security, as the generic cycle-finding algorithms are then not more efficient than the GNFS.
 
 When instantiating schemes based on the intractability of the finite field discrete logarithm problem, one may hence choose between using a Schnorr group, for which $n_d = n_r = 2z$, or a safe-prime group, for which $n_r = n - 1$. In the latter case, one may in turn choose between using a short exponent, such that $n_d = 2z$, or a full length exponent, such that $n_d = n_r = n - 1$. All three parameterization options provide $z$ bits of classical security.
 
 \subsubsection{What finite field groups are used in practice?}
-In practice, Schnorr groups or safe-prime groups with short exponents are often preferred over safe prime groups with full length exponents, as the comparatively short exponents yield considerable performance improvements.
+In practice, Schnorr groups or safe-prime groups with short exponents are often preferred over safe-prime groups with full length exponents, as the comparatively short exponents yield considerable performance improvements.
 
 The discrete logarithm problem in Schnorr groups is of standard form, unlike the short discrete logarithm problem in safe-prime groups, and Schnorr groups are faster to generate than safe-prime groups. A downside to using Schnorr groups is that group elements received from untrusted parties must be tested for membership of the order $r$ subgroup. This typically involves exponentiating the element to the power of $r$, which is computationally expensive. Safe-prime groups are more flexible than Schnorr groups, in that the exponent length may be adaptively selected depending on the performance requirements. The reader is referred to \cite{oorschot} for a more in-depth comparison and historical recommendations. In more recent years, the use of safe-prime groups would appear to have become increasingly prevalent. Some cryptographic schemes, such as the Diffie-Hellman key agreement protocol, are agnostic to the choice of group, whereas other schemes, such as DSA, use Schnorr groups for efficiency reasons.
 
-The National Institute of Standards and Technology (NIST) in the United States standardizes the use of cryptology in unclassified applications within the federal government. Up until April of 2018, NIST recommended the use of randomly selected Schnorr groups with moduli of length 2048 bits for Diffie-Hellman key agreement. NIST changed this recommendation in the 3rd revision of SP800-56A \cite{nist-sp-800-56-part1-rev3-2018}, and are now advocating using a fixed set of safe-prime groups with moduli of length up to 8192 bits, with short or full length exponents. These groups were originally developed for TLS \cite{rfc-tls} and IKE \cite{rfc-ike} where, again, they are used either with short of full length exponents.
+The National Institute of Standards and Technology (NIST) in the United States standardizes the use of crypto\-graphy in unclassified applications within the federal government. Up until April of 2018, NIST recommended the use of randomly selected Schnorr groups with moduli of length 2048 bits for Diffie-Hellman key agreement. NIST changed this recommendation in the 3rd revision of SP800-56A \cite{nist-sp-800-56-part1-rev3-2018}, and are now advocating using a fixed set of safe-prime groups with moduli of length up to 8192 bits, with short or full length exponents. These groups were originally developed for TLS \cite{rfc-tls} and IKE \cite{rfc-ike} where, again, they are used either with short of full length exponents.
 
 \subsubsection{Complexity estimates}
-To estimates the resource and time requirements for computing discrete logarithms in finite fields for various modulus lengths $n$, and for the aforementioned  parameterizations options, we need to decide on what model to use for estimating $z$ as a function of $n$. Various models have been proposed over the years, see for instance \cite{lenstra-verheul-model-2001, lenstra-model-2004}. For simplicity, we use the same model that NIST uses in SP 800-56A \cite{nist-sp-800-56-part1-rev3-2018}. It is described on page~110 in FIPS 140-2 IG \cite{fips-140-2-IG}. Note that NIST rounds $z$ to the closest multiple of eight bits.
+To estimates the resource and time requirements for computing discrete logarithms in finite fields for various modulus lengths $n$, and for the aforementioned parameterization options, we need to decide on what model to use for estimating $z$ as a function of $n$. Various models have been proposed over the years, see for instance \cite{lenstra-verheul-model-2001, lenstra-model-2004, keylength2019}. For simplicity, we use the same model that NIST uses in SP 800-56A \cite{nist-sp-800-56-part1-rev3-2018}. It is described on p.~110 of FIPS 140-2 IG \cite{fips-140-2-IG}. Note that NIST rounds $z$ to the closest multiple of eight bits.
 
 To compute short logarithms in safe-prime groups, the best option is to use Ekerå-Håstad's algorithm \cite{ekeraa2017quantum, ekeraa2017pp} that is specialized for this purpose. To compute general discrete logarithms in safe-prime or Schnorr groups, one option is to use Ekerå's algorithm \cite{ekeraa2018general}. As is explained in \cite{ekeraa2017pp, ekeraa2018general}, a single correct run of these quantum algorithms suffices for the logarithm to be recovered with $\ge 99\%$ success probability in the classical post-processing. These algorithms do not require the order of the group to be known. See~\tbl{impact-dlp-ff} and \fig{plot-costs} for complexity estimates.
 
@@ -1316,7 +1412,7 @@ This implies that Shor's algorithm outperforms Ekerå's algorithm, as Shor's alg
 Note that for safe-prime groups, $r = (N-1)/2$, so when $N$ is known to the adversary then so is $r$. For Schnorr groups, it may be that $r$ is unknown to the adversary, especially if the group is randomly selected. It may be hard to compute $r$ classically, as it amounts to finding a $n_r = 2z$ bit prime factor of $(N-1)/2$.
 
 \subsection{Implications for elliptic curve discrete logarithms}
-Over the past decades cryptographic schemes based on the intractability of the DLP in finite fields and the RSA integer factoring problem have gradually been replaced by cryptography based on the intractability of the DLP in elliptic curve groups. This is reflected in standards issued by organization such as NIST.
+Over the past decades cryptographic schemes based on the intractability of the DLP in finite fields and the RSA integer factoring problem have gradually been replaced by cryptography based on the intractability of the DLP in elliptic curve groups. This is reflected in standards issued by organizations such as NIST.
 
 Not all optimizations developed in this paper are directly applicable to arithmetic in elliptic curve groups. It is an interesting topic for future research to study to what extent the optimizations developed in this paper may be adapted to optimize such arithmetic operations (see \sec{revisit-elliptic-curves}). This paper should not be perceived to indicate that the RSA integer factoring problem and the DLP in finite fields is in itself less complex than the DLP in elliptic curve groups on quantum computers. The feasibility of optimizing the latter problem must first be properly studied.
 
@@ -1345,7 +1441,7 @@ Early adopters may therefore wish to consider implementing schemes conjectured t
 
 The multiplication circuits that we are using have a Toffoli count that scales quadratically (up to polylog factors).
 There are multiplication circuits with asymptotically better Toffoli counts.
-For example, the Karatsuba algorithm \cite{karatsuba1962multiplication} has a Toffoli count of $O(n^{\lg 3})$ and the Schönhage–Strassen algorithm \cite{schonhage1971multiply} has a Toffoli count of $O(n \lg n \lg \lg n)$.
+For example, the Karatsuba algorithm~\cite{karatsuba1962multiplication} has a Toffoli count of $O(n^{\lg 3})$ and the Schönhage–Strassen algorithm \cite{schonhage1971multiply} has a Toffoli count of $O(n \lg n \lg \lg n)$.
 However, there are difficulties when attempting to use these asymptotically efficient algorithms in the context of Shor's algorithm.
 
 The first difficulty is that efficient multiplication algorithms are typically classical, implemented with non-reversible computation in mind.
@@ -1404,8 +1500,8 @@ Therefore we leave optimizing distillation not as future work, but as ongoing wo
 
 Most of the logical qubits in our construction spend most of their time sitting still, waiting for other qubits to be processed.
 It should be possible to store these qubits in a more compact, but less computationally convenient, form.
-A simple example is that resting qubits don't need the ``padding layer" between qubits shown in \fig{lattice-surgery-board}, because this layer is only there to make surgery easier.
-Another simple example is that there appear to be ways to pack lattice surgery qubits that use less area while preserving the code distance (e.g. the ``houses" shown in \fig{qubit-houses}).
+A simple example is that resting qubits don't need the ``padding layer" between qubits implicit in \fig{lattice-surgery-qubit}, because this layer is only there to make surgery easier.
+Another example is that there may to be ways to pack lattice surgery qubits that use less area while preserving the code distance (e.g. the ``bulbs" shown in \fig{qubit-houses}).
 
 One could also imagine encoding the resting qubits into a block code.
 The difficulty is in finding a block code that a) works with small groups of qubits, b) can be encoded and decoded fast enough and compactly enough to fit into the existing computation, and c) is sufficiently better than the surface code that the benefits (reduced code distance within the surface code) outweigh the costs (redundant additional qubits).
@@ -1422,19 +1518,97 @@ Until careful simulations are done it will be unclear what the answer to these q
 
 \begin{figure}
     \label{fig:qubit-houses}
-    \resizebox{0.6 \linewidth}{!}{
-        \includegraphics{assets/qubit-houses.png}
+    \resizebox{0.8 \linewidth}{!}{
+        \includegraphics{assets/qubit-houses.pdf}
     }
+    %     StabilizerConfigurationDiagram(r"""
+    %                       X       X       X       X       X       X               X       X       X       X       X       X               X       X       X       X       X       X               X       X       X       X
+    %                      / \     / \     / \     / \     / \     / \             / \     / \     / \     / \     / \     / \             / \     / \     / \     / \     / \     / \             / \     / \     / \     / \
+    %         o   o       o   o   o   o   o   o   o   o   o   o   o   o   o       o   o   o   o   o   o   o   o   o   o   o   o   o       o   o   o   o   o   o   o   o   o   o   o   o   o       o   o   o   o   o   o   o   o   o
+    %          \ / \       \ / \ / \ / \ / \ / \ / \ / \ / \ / \ / \ / \ / \       \ / \ / \ / \ / \ / \ / \ / \ / \ / \ / \ / \ / \       \ / \ / \ / \ / \ / \ / \ / \ / \ / \ / \ / \ / \       \ / \ / \ / \ / \ / \ / \ / \ /
+    %           X   Z       Z   X   Z   X   Z   X   Z   X   Z   X   Z   X   Z       Z   X   Z   X   Z   X   Z   X   Z   X   Z   X   Z       Z   X   Z   X   Z   X   Z   X   Z   X   Z   X   Z       Z   X   Z   X   Z   X   Z   X
+    %          / \ /       / \ / \ / \ / \ / \ / \ / \ / \ / \ / \ / \ / \ /       / \ / \ / \ / \ / \ / \ / \ / \ / \ / \ / \ / \ /       / \ / \ / \ / \ / \ / \ / \ / \ / \ / \ / \ / \ /       / \ / \ / \ / \ / \ / \ / \ / \
+    %         o   o       o   o   o   o   o   o   o   o   o   o   o   o   o       o   o   o   o   o   o   o   o   o   o   o   o   o       o   o   o   o   o   o   o   o   o   o   o   o   o       o   o   o   o   o   o   o   o   o
+    %          \ /       / \ / \ / \ / \ / \ / \ / \ / \ / \ / \ / \ / \ /       / \ / \ / \ / \ / \ / \ / \ / \ / \ / \ / \ / \ /       / \ / \ / \ / \ / \ / \ / \ / \ / \ / \ / \ / \ /       / \ / \ / \ / \ / \ / \ / \ / \ /
+    %           Z       Z   X   Z   X   Z   X   Z   X   Z   X   Z   X   Z       Z   X   Z   X   Z   X   Z   X   Z   X   Z   X   Z       Z   X   Z   X   Z   X   Z   X   Z   X   Z   X   Z       Z   X   Z   X   Z   X   Z   X   Z
+    %          / \       \ / \ / \ / \ / \ / \ / \ / \ / \ / \ / \ / \ / \       \ / \ / \ / \ / \ / \ / \ / \ / \ / \ / \ / \ / \       \ / \ / \ / \ / \ / \ / \ / \ / \ / \ / \ / \ / \       \ / \ / \ / \ / \ / \ / \ / \ / \
+    %         o   o       o   o   o   o   o   o   o   o   o   o   o   o   o       o   o   o   o   o   o   o   o   o   o   o   o   o       o   o   o   o   o   o   o   o   o   o   o   o   o       o   o   o   o   o   o   o   o   o
+    %          \ / \       \ / \ / \ / \ / \ / \ / \ / \ / \ / \ / \ / \ / \       \ / \ / \ / \ / \ / \ / \ / \ / \ / \ / \ / \ / \       \ / \ / \ / \ / \ / \ / \ / \ / \ / \ / \ / \ / \       \ / \ / \ / \ / \ / \ / \ / \ /
+    %           X   Z       Z   X   Z   X   Z   X   Z   X   Z   X   Z   X   Z       Z   X   Z   X   Z   X   Z   X   Z   X   Z   X   Z       Z   X   Z   X   Z   X   Z   X   Z   X   Z   X   Z       Z   X   Z   X   Z   X   Z   X
+    %          / \ /       / \ / \ / \ / \ / \ / \ / \ / \ / \ / \ / \ / \ /       / \ / \ / \ / \ / \ / \ / \ / \ / \ / \ / \ / \ /       / \ / \ / \ / \ / \ / \ / \ / \ / \ / \ / \ / \ /       / \ / \ / \ / \ / \ / \ / \ / \
+    %         o   o       o   o   o   o   o   o   o   o   o   o   o   o   o       o   o   o   o   o   o   o   o   o   o   o   o   o       o   o   o   o   o   o   o   o   o   o   o   o   o       o   o   o   o   o   o   o   o   o
+    %          \ /       / \ / \ / \ / \ / \ / \ / \ / \ / \ / \ / \ / \ /       / \ / \ / \ / \ / \ / \ / \ / \ / \ / \ / \ / \ /       / \ / \ / \ / \ / \ / \ / \ / \ / \ / \ / \ / \ /       / \ / \ / \ / \ / \ / \ / \ / \ /
+    %           Z       Z   X   Z   X   Z   X   Z   X   Z   X   Z   X   Z       Z   X   Z   X   Z   X   Z   X   Z   X   Z   X   Z       Z   X   Z   X   Z   X   Z   X   Z   X   Z   X   Z       Z   X   Z   X   Z   X   Z   X   Z
+    %          / \       \ / \ / \ / \ / \ / \ / \ / \ / \ / \ / \ / \ / \       \ / \ / \ / \ / \ / \ / \ / \ / \ / \ / \ / \ / \       \ / \ / \ / \ / \ / \ / \ / \ / \ / \ / \ / \ / \       \ / \ / \ / \ / \ / \ / \ / \ / \
+    %         o   o       o   o   o   o   o   o   o   o   o   o   o   o   o       o   o   o   o   o   o   o   o   o   o   o   o   o       o   o   o   o   o   o   o   o   o   o   o   o   o       o   o   o   o   o   o   o   o   o
+    %          \ / \       \ / \ / \ / \ / \ / \ / \ / \ / \ / \ / \ / \ / \       \ / \ / \ / \ / \ / \ / \ / \ / \ / \ / \ / \ / \       \ / \ / \ / \ / \ / \ / \ / \ / \ / \ / \ / \ / \       \ / \ / \ / \ / \ / \ / \ / \ /
+    %           X   Z       Z   X   Z   X   Z   X   Z   X   Z   X   Z   X   Z       Z   X   Z   X   Z   X   Z   X   Z   X   Z   X   Z       Z   X   Z   X   Z   X   Z   X   Z   X   Z   X   Z       Z   X   Z   X   Z   X   Z   X
+    %          / \ /       / \ / \ / \ / \ / \ / \ / \ / \ / \ / \ / \ / \ /       / \ / \ / \ / \ / \ / \ / \ / \ / \ / \ / \ / \ /       / \ / \ / \ / \ / \ / \ / \ / \ / \ / \ / \ / \ /       / \ / \ / \ / \ / \ / \ / \ / \
+    %         o   o       o   o   o   o   o   o   o   o   o   o   o   o   o       o   o   o   o   o   o   o   o   o   o   o   o   o       o   o   o   o   o   o   o   o   o   o   o   o   o       o   o   o   o   o   o   o   o   o
+    %          \ /       / \ / \ / \ / \ / \ / \ / \ / \ / \ / \ / \ / \ /       / \ / \ / \ / \ / \ / \ / \ / \ / \ / \ / \ / \ /       / \ / \ / \ / \ / \ / \ / \ / \ / \ / \ / \ / \ /       / \ / \ / \ / \ / \ / \ / \ / \ /
+    %           Z       Z   X   Z   X   Z   X   Z   X   Z   X   Z   X   Z       Z   X   Z   X   Z   X   Z   X   Z   X   Z   X   Z       Z   X   Z   X   Z   X   Z   X   Z   X   Z   X   Z       Z   X   Z   X   Z   X   Z   X   Z
+    %          / \       \ / \ / \ / \ / \ / \ / \ / \ / \ / \ / \ / \ / \       \ / \ / \ / \ / \ / \ / \ / \ / \ / \ / \ / \ / \       \ / \ / \ / \ / \ / \ / \ / \ / \ / \ / \ / \ / \       \ / \ / \ / \ / \ / \ / \ / \ / \
+    %         o   o       o   o   o   o   o   o   o   o   o   o   o   o   o       o   o   o   o   o   o   o   o   o   o   o   o   o       o   o   o   o   o   o   o   o   o   o   o   o   o       o   o   o   o   o   o   o   o   o
+    %          \ / \       \ / \ / \ / \ / \ / \ / \ / \ / \ / \ / \ / \ / \       \ / \ / \ / \ / \ / \ / \ / \ / \ / \ / \ / \ / \       \ / \ / \ / \ / \ / \ / \ / \ / \ / \ / \ / \ / \       \ / \ / \ / \ / \ / \ / \ / \ /
+    %           X   Z       Z   X   Z   X   Z   X   Z   X   Z   X   Z   X   Z       Z   X   Z   X   Z   X   Z   X   Z   X   Z   X   Z       Z   X   Z   X   Z   X   Z   X   Z   X   Z   X   Z       Z   X   Z   X   Z   X   Z   X
+    %          / \ / \     / \ / \ / \ / \ / \ / \ / \ / \ / \ / \ / \ / \ / \     / \ / \ / \ / \ / \ / \ / \ / \ / \ / \ / \ / \ / \ @   / \ / \ / \ / \ / \ / \ / \ / \ / \ / \ / \ / \ / \     / \ / \ / \ / \ / \ / \ / \ / \
+    %         o   o   o   o   o   o   o   o   o   o   o   o   o   o   o   o   o   o   o   o   o   o   o   o   o   o   o   o   o   o   o   o   o   o   o   o   o   o   o   o   o   o   o   o   o   o   o   o   o   o   o   o   o   o
+    %          \ / \ / \ / \ / \ / \ / \ / \ / \ / \ / \ / \ / \ / \ / \ / \ / \ / \ / \ / \ / \ / \ / \ / \ / \ / \ / \ / \ / \ / \ @ \ / \ / \ / \ / \ / \ / \ / \ / \ / \ / \ / \ / \ / \ / \ / \ / \ / \ / \ / \ / \ / \ / \ /
+    %           Z   X   Z   X   Z   X   Z   X   Z   X   Z   X   Z   X   Z   X   Z   X   Z   X   Z   X   Z   X   Z   X   Z   X   Z   X   Z   X   Z   X   Z   X   Z   X   Z   X   Z   X   Z   X   Z   X   Z   X   Z   X   Z   X   Z
+    %          / \ / \ / \ / \ / \ / \ / \ / \ / \ / \ / \ / \ / \ / \ / \ / \ / \ / \ / \ / \ / \ / \ / \ / \ / \ / \ / \ / \ / \ / @ / \ / \ / \ / \ / \ / \ / \ / \ / \ / \ / \ / \ / \ / \ / \ / \ / \ / \ / \ / \ / \ / \ / \
+    %         o   o   o   o   o   o   o   o   o   o   o   o   o   o   o   o   o   o   o   o   o   o   o   o   o   o   o   o   o   o   o   o   o   o   o   o   o   o   o   o   o   o   o   o   o   o   o   o   o   o   o   o   o   o
+    %          \ / \ / \ / \ / \ / \ / \ / \ / \ / \ / \ / \ / \ / \ / \ / \ / \ / \ / \ / \ / \ / \ / \ / \ / \ / \ / \ / \ / \ / \ / @ / \ / \ / \ / \ / \ / \ / \ / \ / \ / \ / \ / \ / \ / \ / \ / \ / \ / \ / \ / \ / \ / \ /
+    %           X   Z   X   Z   X   Z   X   Z   X   Z   X   Z   X   Z   X   Z   X   Z   X   Z   X   Z   X   Z   X   Z   X   Z   X   Z   X   Z   X   Z   X   Z   X   Z   X   Z   X   Z   X   Z   X   Z   X   Z   X   Z   X   Z   X
+    %          / \ / \ / \ / \ / \ / \ / \ / \ / \ / \ / \ / \ / \ / \ / \ / \ / \ / \ / \ / \ / \ / \ / \ / \ / \ / \ / \ / \ / \ / \ @ \ / \ / \ / \ / \ / \ / \ / \ / \ / \ / \ / \ / \ / \ / \ / \ / \ / \ / \ / \ / \ / \ / \
+    %         o   o   o   o   o   o   o   o   o   o   o   o   o   o   o   o   o   o   o   o   o   o   o   o   o   o   o   o   o   o   o   o   o   o   o   o   o   o   o   o   o   o   o   o   o   o   o   o   o   o   o   o   o   o
+    %          \ / \ / \ / \ / \ / \ / \ / \ / \ / \ / \ / \ / \ / \ / \ / \ / \ / \ / \ / \ / \ / \ / \ / \ / \ / \ / \ / \ / \ / \ @ \ / \ / \ / \ / \ / \ / \ / \ / \ / \ / \ / \ / \ / \ / \ / \ / \ / \ / \ / \ / \ / \ / \ /
+    %           Z   X   Z   X   Z   X   Z   X   Z   X   Z   X   Z   X   Z   X   Z   X   Z   X   Z   X   Z   X   Z   X   Z   X   Z   X   Z   X   Z   X   Z   X   Z   X   Z   X   Z   X   Z   X   Z   X   Z   X   Z   X   Z   X   Z
+    %          / \ / \ / \ / \ / \ / \ / \ / \ / \ / \ / \ / \ / \ / \ / \ / \ / \ / \ / \ / \ / \ / \ / \ / \ / \ / \ / \ / \ / \ / @ / \ / \ / \ / \ / \ / \ / \ / \ / \ / \ / \ / \ / \ / \ / \ / \ / \ / \ / \ / \ / \ / \ / \
+    %         o   o   o   o   o   o   o   o   o   o   o   o   o   o   o   o   o   o   o   o   o   o   o   o   o   o   o   o   o   o   o   o   o   o   o   o   o   o   o   o   o   o   o   o   o   o   o   o   o   o   o   o   o   o
+    %          \ / \ / \ / \ / \ / \ / \ / \ / \ / \ / \ / \ / \ / \ / \ / \ / \ / \ / \ / \ / \ / \ / \ / \ / \ / \ / \ / \ / \ / \ / @ / \ / \ / \ / \ / \ / \ / \ / \ / \ / \ / \ / \ / \ / \ / \ / \ / \ / \ / \ / \ / \ / \ /
+    %           X   Z   X   Z   X   Z   X   Z   X   Z   X   Z   X   Z   X   Z   X   Z   X   Z   X   Z   X   Z   X   Z   X   Z   X   Z   X   Z   X   Z   X   Z   X   Z   X   Z   X   Z   X   Z   X   Z   X   Z   X   Z   X   Z   X
+    %          / \ / \ / \ / \ / \ / \ / \ / \ / \ / \ / \ / \ / \ / \ / \ / \ / \ / \ / \ / \ / \ / \ / \ / \ / \ / \ / \ / \ / \ / \ @ \ / \ / \ / \ / \ / \ / \ / \ / \ / \ / \ / \ / \ / \ / \ / \ / \ / \ / \ / \ / \ / \ / \
+    %         o   o   o   o   o   o   o   o   o   o   o   o   o   o   o   o   o   o   o   o   o   o   o   o   o   o   o   o   o   o   o   o   o   o   o   o   o   o   o   o   o   o   o   o   o   o   o   o   o   o   o   o   o   o
+    %          \ / \ / \ / \ / \ / \ / \ / \ / \ / \ / \ / \ / \ / \ / \ / \ / \ / \ / \ / \ / \ / \ / \ / \ / \ / \ / \ / \ / \ / \ @ \ / \ / \ / \ / \ / \ / \ / \ / \ / \ / \ / \ / \ / \ / \ / \ / \ / \ / \ / \ / \ / \ / \ /
+    %           Z   X   Z   X   Z   X   Z   X   Z   X   Z   X   Z   X   Z   X   Z   X   Z   X   Z   X   Z   X   Z   X   Z   X   Z   X   Z   X   Z   X   Z   X   Z   X   Z   X   Z   X   Z   X   Z   X   Z   X   Z   X   Z   X   Z
+    %          / \ / \ / \ / \ / \ / \ / \ / \ / \ / \ / \ / \ / \ / \ / \ / \ / \ / \ / \ / \ / \ / \ / \ / \ / \ / \ / \ / \ / \ / @ / \ / \ / \ / \ / \ / \ / \ / \ / \ / \ / \ / \ / \ / \ / \ / \ / \ / \ / \ / \ / \ / \ / \
+    %         o   o   o   o   o   o   o   o   o   o   o   o   o   o   o   o   o   o   o   o   o   o   o   o   o   o   o   o   o   o   o   o   o   o   o   o   o   o   o   o   o   o   o   o   o   o   o   o   o   o   o   o   o   o
+    %          \ / \ / \ / \ / \ / \ / \ / \ / \ / \ / \ / \ / \ / \ / \ / \ / \ / \ / \ / \ / \ / \ / \ / \ / \ / \ / \ / \ / \ / \ / @ / \ / \ / \ / \ / \ / \ / \ / \ / \ / \ / \ / \ / \ / \ / \ / \ / \ / \ / \ / \ / \ / \ /
+    %           X   Z   X   Z   X   Z   X   Z   X   Z   X   Z   X   Z   X   Z   X   Z   X   Z   X   Z   X   Z   X   Z   X   Z   X   Z   X   Z   X   Z   X   Z   X   Z   X   Z   X   Z   X   Z   X   Z   X   Z   X   Z   X   Z   X
+    %          / \ / \ / \ / \ / \ / \ / \ / \ / \ / \ / \ / \ / \ / \ / \ / \ / \ / \ / \ / \ / \ / \ / \ / \ / \ / \ / \ / \ / \ / \ @ \ / \ / \ / \ / \ / \ / \ / \ / \ / \ / \ / \ / \ / \ / \ / \ / \ / \ / \ / \ / \ / \ / \
+    %         o   o   o   o   o   o   o   o   o   o   o   o   o   o   o   o   o   o   o   o   o   o   o   o   o   o   o   o   o   o   o   o   o   o   o   o   o   o   o   o   o   o   o   o   o   o   o   o   o   o   o   o   o   o
+    %          \ / \ / \ / \ / \ / \ / \ / \ /     \ / \ / \ / \ / \ / \ / \ / \ / \ / \ / \ / \ / \ /     \ / \ / \ / \ / \ / \ / \ @ \ / \ / \ / \ / \ / \ /     \ / \ / \ / \ / \ / \ / \ / \ / \ / \ / \ / \ / \ /     \ / \ /
+    %           Z   X   Z   X   Z   X   Z   X       X   Z   X   Z   X   Z   X   Z   X   Z   X   Z   X       X   Z   X   Z   X   Z   X   Z   X   Z   X   Z   X       X   Z   X   Z   X   Z   X   Z   X   Z   X   Z   X       X   Z
+    %          / \ / \ / \ / \ / \ / \ / \ / \       \ / \ / \ / \ / \ / \ / \ / \ / \ / \ / \ / \ / \       \ / \ / \ / \ / \ / \ / @ / \ / \ / \ / \ / \ / \       \ / \ / \ / \ / \ / \ / \ / \ / \ / \ / \ / \ / \       \ / \
+    %         o   o   o   o   o   o   o   o   o       o   o   o   o   o   o   o   o   o   o   o   o   o       o   o   o   o   o   o   o   o   o   o   o   o   o       o   o   o   o   o   o   o   o   o   o   o   o   o       o   o
+    %          \ / \ / \ / \ / \ / \ / \ / \ / \       \ / \ / \ / \ / \ / \ / \ / \ / \ / \ / \ / \ / \       \ / \ / \ / \ / \ / \ / @ / \ / \ / \ / \ / \ / \       \ / \ / \ / \ / \ / \ / \ / \ / \ / \ / \ / \ / \       \ /
+    %           X   Z   X   Z   X   Z   X   Z   X       X   Z   X   Z   X   Z   X   Z   X   Z   X   Z   X       X   Z   X   Z   X   Z   X   Z   X   Z   X   Z   X       X   Z   X   Z   X   Z   X   Z   X   Z   X   Z   X       X
+    %          / \ / \ / \ / \ / \ / \ / \ / \ /       / \ / \ / \ / \ / \ / \ / \ / \ / \ / \ / \ / \ /     # / \ # # / \ # # / \ # # @ \ # # / \ # # / \ # # /       / \ / \ / \ / \ / \ / \ / \ / \ / \ / \ / \ / \ /       / \
+    %         o   o   o   o   o   o   o   o   o       o   o   o   o   o   o   o   o   o   o   o   o   o       o   o   o   o   o   o   o   o   o   o   o   o   o       o   o   o   o   o   o   o   o   o   o   o   o   o       o   o
+    %          \ / \ / \ / \ / \ / \ / \ / \ /       / \ / \ / \ / \ / \ / \ / \ / \ / \ / \ / \ / \ /       / # # \ / # # \ / # # \ @ # # \ / # # \ / # # \ / #     / \ / \ / \ / \ / \ / \ / \ / \ / \ / \ / \ / \ /       / \ /
+    %           Z   X   Z   X   Z   X   Z   X       X   Z   X   Z   X   Z   X   Z   X   Z   X   Z   X       X   Z   X   Z   X   Z   X   Z   X   Z   X   Z   X       X   Z   X   Z   X   Z   X   Z   X   Z   X   Z   X       X   Z
+    %          / \ / \ / \ / \ / \ / \ / \ / \       \ / \ / \ / \ / \ / \ / \ / \ / \ / \ / \ / \ / \       \ / \ / \ / \ / \ / \ / @ / \ / \ / \ / \ / \ / \       \ / \ / \ / \ / \ / \ / \ / \ / \ / \ / \ / \ / \       \ / \
+    %         o   o   o   o   o   o   o   o   o       o   o   o   o   o   o   o   o   o   o   o   o   o       o   o   o   o   o   o   o   o   o   o   o   o   o       o   o   o   o   o   o   o   o   o   o   o   o   o       o   o
+    %          \ / \ / \ / \ / \ / \ / \ / \ / \       \ / \ / \ / \ / \ / \ / \ / \ / \ / \ / \ / \ / \       \ / \ / \ / \ / \ / \ / @ / \ / \ / \ / \ / \ / \       \ / \ / \ / \ / \ / \ / \ / \ / \ / \ / \ / \ / \       \ /
+    %           X   Z   X   Z   X   Z   X   Z   X       X   Z   X   Z   X   Z   X   Z   X   Z   X   Z   X       X   Z   X   Z   X   Z   X   Z   X   Z   X   Z   X       X   Z   X   Z   X   Z   X   Z   X   Z   X   Z   X       X
+    %          / \ / \ / \ / \ / \ / \ / \ / \ /       / \ / \ / \ / \ / \ / \ / \ / \ / \ / \ / \ / \ /       / \ / \ / \ / \ / \ / \ @ \ / \ / \ / \ / \ / \ /       / \ / \ / \ / \ / \ / \ / \ / \ / \ / \ / \ / \ /       / \
+    %         o   o   o   o   o   o   o   o   o       o   o   o   o   o   o   o   o   o   o   o   o   o       o   o   o   o   o   o   o   o   o   o   o   o   o       o   o   o   o   o   o   o   o   o   o   o   o   o       o   o
+    %          \ / \ / \ / \ / \ / \ / \ / \ /       / \ / \ / \ / \ / \ / \ / \ / \ / \ / \ / \ / \ /       / \ / \ / \ / \ / \ / \ @ \ / \ / \ / \ / \ / \ /       / \ / \ / \ / \ / \ / \ / \ / \ / \ / \ / \ / \ /       / \ /
+    %           Z   X   Z   X   Z   X   Z   X       X   Z   X   Z   X   Z   X   Z   X   Z   X   Z   X       X   Z   X   Z   X   Z   X   Z   X   Z   X   Z   X       X   Z   X   Z   X   Z   X   Z   X   Z   X   Z   X       X   Z
+    %          / \ / \ / \ / \ / \ / \ / \ / \       \ / \ / \ / \ / \ / \ / \ / \ / \ / \ / \ / \ / \       \ / \ / \ / \ / \ / \ / @ / \ / \ / \ / \ / \ / \       \ / \ / \ / \ / \ / \ / \ / \ / \ / \ / \ / \ / \       \ / \
+    %         o   o   o   o   o   o   o   o   o       o   o   o   o   o   o   o   o   o   o   o   o   o       o   o   o   o   o   o   o   o   o   o   o   o   o       o   o   o   o   o   o   o   o   o   o   o   o   o       o   o
+    %          \ / \ / \ / \ / \ / \ / \ / \ / \       \ / \ / \ / \ / \ / \ / \ / \ / \ / \ / \ / \ / \       \ / \ / \ / \ / \ / \ / @ / \ / \ / \ / \ / \ / \       \ / \ / \ / \ / \ / \ / \ / \ / \ / \ / \ / \ / \       \ /
+    %           X   Z   X   Z   X   Z   X   Z   X       X   Z   X   Z   X   Z   X   Z   X   Z   X   Z   X       X   Z   X   Z   X   Z   X   Z   X   Z   X   Z   X       X   Z   X   Z   X   Z   X   Z   X   Z   X   Z   X       X
+    %          / \ / \ / \ / \ / \ / \ / \ / \ /       / \ / \ / \ / \ / \ / \ / \ / \ / \ / \ / \ / \ /       / \ / \ / \ / \ / \ / \ @ \ / \ / \ / \ / \ / \ /       / \ / \ / \ / \ / \ / \ / \ / \ / \ / \ / \ / \ /       / \
+    %         o   o   o   o   o   o   o   o   o       o   o   o   o   o   o   o   o   o   o   o   o   o       o   o   o   o   o   o   o   o   o   o   o   o   o       o   o   o   o   o   o   o   o   o   o   o   o   o       o   o
+    %          \ /     \ /     \ /     \ /             \ /     \ /     \ /     \ /     \ /     \ /             \ /     \ /     \ /   @ \ /     \ /     \ /             \ /     \ /     \ /     \ /     \ /     \ /             \ /
+    %           Z       Z       Z       Z               Z       Z       Z       Z       Z       Z               Z       Z       Z       Z       Z       Z               Z       Z       Z       Z       Z       Z               Z
+    % """))
     \captionof{figure}{
-        A possible dense packing for idle lattice surgery qubits, using $1.5d^2 + O(d)$ physical qubits instead of $2(d+1)^2$.
-        In the diagram, there is one distance 9 logical qubit per ``house" (triangular roof plus rectangular base).
-        The logical X/Z observable chains of one of the qubit houses is shown.
-        The two region highlight colors correspond to different operation orders for performing stabilizer measurements.
-        This is important information because every stabilizer measurement has one particular physical error, the ``long error", that can produce detection events a distance 2 apart.
-        By choosing the operation order, we determine if the long errors of each type are oriented vertically or horizontally.
-        The goal is to avoid pointing long errors towards boundaries of the same type, because that reduces the effective code distance.
-        In green regions, the long blue errors are vertical and the long green errors are horizontal (by ``blue error" and ``green error" we mean an error that terminates on a boundary of the same color).
-        In blue regions, the long errors have the opposite orientation.
+        A possible dense packing for idle qubits, using $1.5d^2 + O(d)$ physical qubits instead of $2(d+1)^2$.
+        In the diagram, there is one distance 13 logical qubit per ``bulb".
+        The X and Z observables of one of the logical qubits are shown in red and blue respectively.
+        The pattern continues past the cut-off at the left and right sides.
     }
 \end{figure}
 
@@ -1469,14 +1643,13 @@ One caveat here is that each of these much smaller machines has to run its own c
 The optimal windows sizes of the lookups will decrease, and the total computation time will approximately double.
 
 Based on this surface analysis it seems that, instead of using 1 machine with 20 million qubits, we could use 8 machines each with perhaps 4 million qubits, as long as they were connected by quantum channels with bandwidths of 150qb/s.
-But we have not carefully explored this question, and perhaps there are even better ways to distribute the computation with even lower overheads.
-Only future work can tell.
+But we have not carefully explored the question of how to distribute a quantum computation structured in this way and, although there has been significant previous work done on distributing quantum computations such as \cite{meter2008arithmetic,oi2006scalable,jiang2010scalable}, we think the piecewise nature of carry runway adders makes them well suited to a specialized analysis.
 
 \subsection{Revisit elliptic curves}
 \label{sec:revisit-elliptic-curves}
 
 Many of the optimization techniques that we use in this paper generalize to other contexts where arithmetic is performed.
-In particular, consider the Toffoli count for computing discrete logarithms over elliptic curves reported by \cite{roetteler2017quantum}.
+In particular, consider the Toffoli count for computing discrete logarithms over elliptic curves reported in~\cite{roetteler2017quantum}.
 It can likely be improved substantially by using windowed arithmetic.
 On the other hand, because of the need to compute modular inverses, it is not clear if the coset representation of modular integers is applicable.
 
@@ -1495,10 +1668,9 @@ We estimated the approximate cost of our construction, both in the abstract circ
 We presented concrete cost estimates for several cryptographically relevant problems.
 Our estimated costs are orders of magnitude lower than in previous works with comparable physical assumptions.
 
-In \cite{mosca2018cybersecurity}, Mosca poses the hypophoric question: ``How many physical qubits will we need to break RSA-2048? [...] Current estimates range from tens of millions to a billion physical qubits".
-The estimate of ``a billion physical qubits" is likely from \cite{fowler2012surfacecodereview}.
-Our physical assumptions are more pessimistic than the physical assumptions used in that paper (see \tbl{historical-comparison}), so our results can be directly compared.
-Doing so shows that, in the four years since 2015, the upper end of the estimate of how many qubits will be needed to factor 2048 bit RSA integers has dropped nearly two orders of magnitude; from a billion to twenty million.
+In \cite{mosca2018cybersecurity}, Mosca poses the rhetorical question: ``How many physical qubits will we need to break RSA-2048? [...] Current estimates range from tens of millions to a billion physical qubits".
+One of the sources estimating a billion physical qubits is \cite{fowler2012surfacecodereview}.
+Our physical assumptions are more pessimistic than the physical assumptions used in that paper (see \tbl{historical-comparison}) so it is reasonable to say that, in the four years since 2015, the upper end of the estimate of how many qubits will be needed to factor 2048 bit RSA integers has dropped nearly two orders of magnitude; from a billion to twenty million.
 
 Clearly the low end of Mosca's estimate should also drop.
 However, the low end of the estimate is highly sensitive to advances in the design of quantum error correcting codes, the engineering of physical qubits, and the construction of quantum circuits.
@@ -1641,8 +1813,6 @@ Here is where each entry in the table came from:
         Concrete numbers at specific sizes come from ancillary file ``estimate\_costs.py".
         The Toffoli count does not account for the chance of retrying (because it is mostly insensitive to changes that lower this chance), but the volume does account for it (i.e. it is the expected total volume to factor, not the per-run volume).
     \item Roetteler et al. 2017 \cite{roetteler2017quantum}:
-        Note that we used different values of $n$ in order to compare against ECC keys with comparable security.
-        We used the same size pairs as in \cite{roetteler2017quantum} after double-checking them using \href{https://www.keylength.com/}{keylength.com} \cite{keylength2019}.
         \begin{itemize}
             \item Toffoli+T/2 Count (asymptotic):
                 From the paper's abstract.
@@ -1654,6 +1824,10 @@ Here is where each entry in the table came from:
                 From Table 2.
             \item Numbers at specific $n$: from ``fill-in-table.py".
         \end{itemize}
+        Note that an $n$ bit prime order elliptic curve group provides approximately $n/2$ bits of classical security (see Appendix~D to \cite{nist-sp-800-56-part1-rev3-2018}), since the best classical attacks are cycle-finding attacks,
+        whilst RSA-1024, RSA-2048 and RSA-3072 provide approximately $80$, $112$ and $128$ bits of classical security, respectively, according to the model used by NIST (see Appendix D to~\cite{nist-sp-800-56-part2-rev2-2018}).
+        There are several other models~\cite{keylength2019, lenstra-model-2004, lenstra-verheul-model-2001}.
+        The table compares problem instances that provide the same level of classical security according to the NIST model.
 \end{itemize}
 
 \section{Notes on \texorpdfstring{\tbl{historical-comparison}}{Table II}}
@@ -1675,9 +1849,12 @@ Here is where each entry in the table came from:
     \item \textbf{Distillation strategy}:
         The dominant kind of magic states being distilled, and the number or type of factory being used to distill them.
     \item \textbf{Execution strategy}:
-        How the computation progresses.
-        Serial distillation means there is one factory producing magic states one by one, and this determines the cadence of the computation.
-        Threaded means reaction limited computation is being used, with the number of threads corresponding to the number of distinct chains of dependent Toffolis being executed in parallel.
+        Notes on how the computation progresses at a low level.
+        Each construction spends most of its time performing additions, so this column ended up describing addition strategies.
+        The suffixes ``carry lookahead", ``ripple carry", and ``carry runways" describe the type of adder being used.
+        The prefixes ``distillation limited" and ``reaction limited" describe what is preventing the adder from running faster.
+        Distillation limited means that the adder is bottlenecked on magic states being produced.
+        Reaction limited means that the adder is bottlenecked on the control system resolving long chains of dependent measurement bases.
     \item \textbf{Physical qubits}:
         The number of physical qubits used by the computation, using the original historical assumptions.
     \item \textbf{Expected runtime}:
@@ -1690,18 +1867,21 @@ Here is where each entry in the table came from:
 \subsection{Entries}
 
 \begin{itemize}
+    \item Van Meter et al. 2009 \cite{van2010distributed}:
+        Numbers are derived from Table 2 of \cite{van2010distributed}.
+        The paper doesn't use reaction limited computation, so the reaction time is not included.
+    \item Jones et al. 2009 \cite{jones2012layered}:
+        Numbers are derived from Figure 15, Table II, and Table VII of \cite{jones2012layered}.
+        The paper doesn't use reaction limited computation, so the reaction time is not included.
     \item Fowler et al. 2012 \cite{fowler2012surfacecodereview}:
         Numbers are from the background section of \cite{fowler2012surfacecodereview}.
-        Their expected volume is directly comparable to ours, despite the different reaction time assumption, because their volume estimate is dominated by distillation and changing the reaction time does not affect distillation volume.
+        This paper's expected volume is directly comparable to ours, despite the different reaction time assumption, because their volume estimate is dominated by distillation and changing the reaction time does not affect distillation volume.
     \item O'Gorman et al. (2017) \cite{ogorman2017factories}:
         Numbers are derived from table I of \cite{ogorman2017factories}.
         The physical qubit count of $2.18 \cdot 10^8$ from their table only includes distillation; we increased it by $3 \cdot 2048 \cdot (2 \cdot 32^2) \approx 0.13 \cdot 10^8$ to account for three $n$-logical-qubit data registers.
-        It is difficult to directly compare O'Gorman et al.'s numbers to ours, because their estimates were made with ion traps in mind.
-        Their underlying physical assumptions differ in ways that have non-trivial effects on the physical layout.
-        In particular, their factories interact remote logical qubits without routing them towards each other.
     \item Gheorghiu et al. (2019) \cite{gheorghiu2019cryptanalysis}
         The physical gate error rate, qubit count, and time are stated in the caption of fig 45 (``B. RSA-2048") of the paper.
-        The surface code cycle time is stated to be 200ns in Section B, soon after equation 3.
+        The surface code cycle time is stated to be 200 nanoseconds in Section B, soon after equation 3.
         The T factory count was inferred by dividing the stated T count of $2.4 \cdot 10^{12}$ by the production rate of the T factory from \cite{fowler2018}, which is approximately 25kHz for the given surface code cycle time.
         The paper does not state a reaction time, but the T states are being used to perform chains of dependent Toffolis.
         This implies the reaction time must be faster than the number factories times the per-factory production rate divided by 4 (the number of Ts needed to perform a Toffoli).
